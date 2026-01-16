@@ -10,3 +10,18 @@ After eight years of research and research, where new things replaced the actual
 ### **It also marks the culmination of nine years of struggling with web-related software.**
 
 The project I'm sharing here was decided after numerous questions to ChatGPT. However, since starting this project, I've realized that the wonderful world of open source software can be very difficult for beginners, with so many different versions and approaches. For example, the official documentation for setting up Apache web server software on an AWS Bitnami-Django instance is often difficult to understand and extremely incomplete. It's impossible to complete without the help of generative AI. So, by recording my detours and what works well in this project, I hope to inspire freeware developers to automate their own projects.
+# **Step1: Project overview**
+[1] Preparing the local Code development environment
+
+[2] Building a Lightsail instance & the Django online app settings
+
+[3] Creating a cloud development environment with GitHub Codespaces
+
+[4] Bitnami, Apache and Django deploying and configuring
+
+[5] Staging server environment generation, operation check, publication, and operational evaluation
+
+[6]Creating a Mysite and publishing it on the web - Renewing the CS50 Problem Set 8 Homepage with Flask.
+
+[7]Creating a final project submission and receiving a certificate of completion.
+
