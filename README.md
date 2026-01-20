@@ -38,9 +38,10 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
    ```
 DNS settings, domain assignment, IP address forwarding settings, certificate issuance, etc.
    ```
-##### **References: Note (4)Figure 1:[Creating an AWS Lightsail instance]**
+##### **References: Figure 1:[Creating an AWS Lightsail instance]**
 
 ③PUTTY usage settings: To access the development management board, a port tunnel connection is made. (SSH connection itself can be made from the instance-specified port.)
 
 ④FileZilla Client settings:(SFTP is required for Requirements updates of Apache and Bitnami, and Server Search)
+
 
