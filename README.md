@@ -25,3 +25,22 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
 
 [7]Creating a final project submission and receiving a certificate of completion.
 
+##### **References: Note (1)**
+## **Work Plan**
+### **[1].Django local development environment setup**
+##### **References: Note (2)**
+##### **References: Note (3)**
+### **[2] Creating an AWS Lightsail (Bitnami Django) instance**
+#### **(1)Creating a Django instance and more**
+   ①Creating an instance itself takes just a few minutes.
+
+   ②initial setup has been largely automated over the past few years.
+   ```
+DNS settings, domain assignment, IP address forwarding settings, certificate issuance, etc.
+   ```
+##### **References: Note (4)Figure 1:[Creating an AWS Lightsail instance]**
+
+③PUTTY usage settings: To access the development management board, a port tunnel connection is made. (SSH connection itself can be made from the instance-specified port.)
+
+④FileZilla Client settings:(SFTP is required for Requirements updates of Apache and Bitnami, and Server Search)
+
