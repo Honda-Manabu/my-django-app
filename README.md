@@ -27,9 +27,9 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
 
 ##### **References: Note (1)**
 ## **Work Plan**
-### **[1].Django local development environment setup**
+### **[1] Django local development environment setup**
 ##### **References: Note (2)**
-##### **References: Note (3)**
+##### **References: Procedure (1)**
 ### **[2] Creating an AWS Lightsail (Bitnami Django) instance**
 #### **(1)Creating a Django instance and more**
    ①Creating an instance itself takes just a few minutes.
@@ -38,10 +38,17 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
    ```
 DNS settings, domain assignment, IP address forwarding settings, certificate issuance, etc.
    ```
-##### **References: Figure 1:[Creating an AWS Lightsail instance]**
+##### **References Figure 1:[Creating an AWS Lightsail instance]**
 
 ③PUTTY usage settings: To access the development management board, a port tunnel connection is made. (SSH connection itself can be made from the instance-specified port.)
 
 ④FileZilla Client settings:(SFTP is required for Requirements updates of Apache and Bitnami, and Server Search)
 
+
+### **[3] Django online development and operation environment setup**
+##### **References: Note (3)**
+##### **References: Procedure (2)**
+##### **References: Note (4)**
+
+### **[4] Bitnami, Apache and Django deploying and configuring with GitHub Codespaces**
 
