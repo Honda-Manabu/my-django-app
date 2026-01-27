@@ -51,4 +51,130 @@ DNS settings, domain assignment, IP address forwarding settings, certificate iss
 ##### **References: Note (4)**
 
 ### **[4] Bitnami, Apache and Django deploying and configuring with GitHub Codespaces**
+#### Discription : [2] has already been executed, and [1] and [3] will be re-executed and additional work will be performed.  The execution results of [1], [2], and [3] are described as Procedure A. After that, new work will begin and the subsequent work is described as Procedure B.
+### **[4]-Procedure A**
+#### **[4]-A1-0 Environment Configuration and Prerequisites**
+```
+- AWS Lightsail Bitnami Django (Apache + Gunicorn)
+- Django virtual environment (venv)
+- AWS Route53, two domains
+- GitHub account
+```
+**[4]-A1-1 (Windows PowerShell) Activating the Python virtual environment**
+```
+Open the project folder in VS Code
+cd C:\projects\< project directory >
+.\venv\Scripts\activate → Launch the virtual environment
+(venv) PS C:\projects\< project directory >> pip freeze | findstr
+   Django
+   Django==4.2 LTS
+(venv) PS C:\projects\< project directory >> pip install -r requirements.txt
+   ((pip install django)(python -m pip install --upgrade pip))
+(venv) PS C:\projects\< project directory >> python -m pip install --upgrade pip
+   Requirement already satisfied:～Successfully installed pip-25.3
+(venv) PS C:\projects\< project directory >> python manage.py runserver
+   ～System check identified no issues (0 silenced).～
+   Starting development server at http://127.0.0.1:8000/
+   Quit the server with CTRL-BREAK.
+
+```
+Check browser access via http://127.0.0.1:8000/ or http://localhost:8000/
+##### **References: Note (5) **　If the port is in use,
+**[4]-A1-2 Log in to GitHub**
+```
+   <user name> /< project name >     Repository exists
+   manage.py,<project_name>/settings.py
+   and requirements.txt exists.
+```
+**[4]-A1-3 Edit the blank requirements.txt file**
+
+   using the "✏ Edit" button → Commit:
+```
+   Django>=4.2,<5.0
+   Gunicorn
+   python-dotenv
+```
+**[4]-A1-4 Create a GitHub repository for Django**
+
+   https://github.com/\<user name\>/\<project name\>
+
+ Create a new repository from the GitHub Web UI.**
+```
+   Create a new repository → Check "Add a README" →
+   Add .gitignore → Select "Python"
+```
+**[4]-A1-5 Launch GitHub Codespaces and configure local Git integration.**
+```
+   Repository → Green Code button → Codespaces tab →
+   Select "Create codespace on main"
+```
+After launching Codespaces, open Extensions (square icon) in the left sidebar and confirm that it's installed.
+```
+   - Python (ms-python.python)
+   - Django
+   - GitLens  (Optional)
+```
+**[4]-A1-6 Open VSCode in your browser → Launch New Terminal from the menu.**
+
+@Honda-Manabu ➜ /workspaces/<project-name> (main)
+```
+   $ python3 –version
+      Python 3.12.1
+      pip install -r requirements.txt
+   $ python3 -m django –version
+      4.2.26
+   $ python3 manage.py runserver 0.0.0.0:8000
+      System check identified no issues (0 silenced).
+      November 19, 2025 - 06:47:07
+      Django version 4.2.26, using settings
+      'my_django_project.settings'
+      Starting development server at http://0.0.0.0:8000/
+   Quit the server with CONTROL-C.
+```
+Display the Django homepage: "Hello, Django!"
+
+The Django development server successfully starts on Codespaces
+##### **References: Note (6)**  Bookmark the dedicated domain for opening the editor.
+**[4]-A1-7 GitHub integration (remote connection)**
+
+##### **References: Note (7) **　Confirming past experiences
+Confirm Git initial setup
+```
+   PS C:\projects\<project directory>> git --version
+      git version 2.50.1.windows.1
+   PS C:\projects\<project directory>> git config --global user.name
+      "Honda-Manabu"
+   PS C:\projects\my-django-app> git config --global user.email
+      "honda-m103742@coast.ocn.ne.jp"
+   PS C:\projects\my-django-app> git config --list
+      …
+   :        exit
+```
+```
+   PS C:\projects\<project directory>> git init
+      Reinitialized existing Git repository in C:
+      /projects/<project directory>/.git/
+   PS C:\projects\<project directory>> git add .
+      warning: in the working copy of 'my_django_project/.env.example',
+      LF will be replaced by CRLF the next time Git touches it
+      warning: in the working copy of 'my_django_project/conf/bitnami/
+      bitnami.conf', LF will be replaced by CRLF the next time
+      Git touches it
+      warning: in the working copy of 'my_django_project/vhostts/
+      myproject-vhost.conf', LF will be replaced by CRLF the next time
+      Git touches it
+   PS C:\projects\<project directory>> git commit -m "Initial commit"
+      …
+```
+Confirm GitHub remote settings
+```
+   PS C:\projects\<project directory>> git remote -v
+      origin https://github.com/<your user.name>/<project directory>
+      .git (fetch)
+      origin https://github.com/<your user.name>/<project directory>
+      .git (push)
+   PS C:\projects\<project directory>> git push -u origin main
+      …
+```
+##### **References: Note (8) **  Git operations in VS Code
 
