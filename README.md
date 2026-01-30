@@ -177,4 +177,81 @@ Confirm GitHub remote settings
       …
 ```
 ##### **References: Note (8) **  Git operations in VS Code
+#### **[4]-A2 Preparation on AWS Lightsail**
+
+For information on creating and initializing a Bitnami Django instance, see [2] Creating an AWS Lightsail (Bitnami Django) instance.
+
+##### **References: Note (9) ** 　Verifying Completion
+**[4]-A2-1 Setting up Git on your Lightsail Django instance**
+
+Connect via SSH using PuTTY or the SSH button in the Lightsail instance's connection tab:
+```
+   bitnami@ip-172-26-15-83:~$ sudo apt update Get:1
+   file:/etc/apt/mirrors/debian.list Mirrorlist [38 B]
+   …
+   2 packages can be upgraded. Run 'apt list --
+   upgradable' to see them.
+```
+```
+   bitnami@ip-172-26-15-83:~$ sudo apt install git -y
+   Reading package lists... Done
+   …
+   git is already the newest version (1:2.39.5-
+   0+deb12u2). 0 upgraded, 0 newly installed, 0
+   to remove and 2 not upgraded.
+```
+**[4]-A2-2 Display your Lightsail public key and register it on GitHub.**
+
+Generate a key (Ed25519)(with the SSH connection established above)
+```
+   ssh-keygen -t ed25519 -C "your-email@example.com"
+   (Your GitHub registered email address)
+   (Press Enter repeatedly.)
+   Enter file in which to save the key
+      (/home/bitnami/.ssh/id_ed25519):
+   Enter passphrase (empty for no passphrase):
+   Enter same passphrase again:
+      SHA256:sxwE8bJBU05zoy4VH0AcTEDllrfzPyrn38WK
+      ZSOApdYyour-email@example.com
+      The key's randomart image is:
+      +--[ED25519 256]--+
+      | .BX@o+ |
+      | . BoB o |
+      | o X + |
+      | O * . |
+      | o S E |
+      | + + + . |
+      | o o + o|
+      | . .*.+.|
+      | ++o+..|
+      +----[SHA256]-----+
+```
+Create two files: ~/.ssh/id_ed25519 (private key) and ~/.ssh/id_ed25519.pub (public key)
+
+Display your public key and Register on GitHub
+```
+   cat ~/.ssh/id_ed25519.pub
+
+   Copy the displayed key → GitHub Click your profile
+   icon → Settings → In the left sidebar, under
+   "Access," click SSH and GPG keys → New SSH key →
+   Title:Lightsail Django → Key:Paste → Add SSH key
+```
+Confirming the connection
+```
+   bitnami@ip-172-26-15-83:~$ ssh -T git@github.com
+(first time connection)
+   The authenticity of host 'github.com
+   (20.27.177.113)'can't be established. ED25519 key
+   fingerprint is SHA256:+DiY3wvvV6TuJJhbpZisF/
+   zLDA0zPMSvHdkr4UvCOqU.
+   This key is not known by any other names.
+   Are you sure you want to continue connecting
+   (yes/no/[fingerprint])?
+   yes                     (y Not possible)
+   Warning: Permanently added 'github.com' (ED25519) to
+   the list of known hosts.
+   Hi Honda-Manabu! You've successfully authenticated,
+   but GitHub does not provide shell access.
+```
 
