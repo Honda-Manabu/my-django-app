@@ -254,4 +254,67 @@ Confirming the connection
    Hi Honda-Manabu! You've successfully authenticated,
    but GitHub does not provide shell access.
 ```
+**[4]-A2-3 Clone a Django project from GitHub to Lightsail**
+
+Check the URL at the top of your GitHub repository.
+```
+   https://github.com/[your user.name]/[your repository name]
+```
+Execute git clone and verify.
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects$ git clone
+   git@github.com:Honda-Manabu/my-django-app.git
+      Cloning into 'my-django-app'...
+      remote: Enumerating objects: 47, done.
+      …Resolving deltas: 100% (12/12), done.
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects$ ls -l
+   /opt/bitnami/projects
+      total 12
+      drwxr-xr-x 5 bitnami bitnami 4096 Nov 21 21:56 my-django-app
+      drwxr-xr-x 6 bitnami daemon 4096 Oct 12 23:07 myproject
+      drwxr-xr-x 5 bitnami bitnami 4096 Nov 1 11:48 venv
+```
+**[4]-A2-4 Create a separate venv for each project (my-django-app)**
+
+The procedure is the same as [4]-A1-1.
+```
+   cd /opt/bitnami/projects/my-django-app
+   /opt/bitnami/python/bin/python3 -m venv venv
+   source venv/bin/activate
+
+   ((venv) ) bitnami@ip-172-26-15-83:
+      pip install --upgrade pip
+      pip install -r requirements.txt
+```
+**[4]-A2-5 Django DB migration and static file collection**
+
+Continue with the above virtual environment active.
+```
+   ((venv) ) bitnami@ip-172-26-15-83:/opt/bitnami/projects/
+   my-django-app$
+         ./venv/bin/python manage.py migrate
+         Operations to perform:
+          Apply all migrations: admin, auth, contenttypes,
+          sessions Running migrations:
+         No migrations to apply.
+
+         python manage.py collectstatic --noinput
+         125 static files copied to '/opt/bitnami/projects/
+         my-django-app/staticfiles'.
+```
+**[4]-A2-6 Verify the Django development server is working**
+```
+   ((venv) ) bitnami@ip-172-26-15-83:/opt/bitnami/projects/
+   my-django-app$
+      python manage.py runserver 0.0.0.0:8000
+         Watching for file changes with StatReloader
+         Performing system checks...
+         System check identified no issues (0 silenced).
+         November 25, 2025 - 04:29:56
+         Django version 4.2.26, using settings
+         'my_django_project.settings'
+         Starting development server at http://0.0.0.0:8000/
+         Quit the server with CONTROL-C.
+```
+
 
