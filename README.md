@@ -286,6 +286,18 @@ The procedure is the same as [4]-A1-1.
       pip install --upgrade pip
       pip install -r requirements.txt
 ```
+Modify settings.py ALLOWED_HOSTS
+```
+   [ host.strip() for host in os.getenv("DJANGO_
+   ALLOWED_HOSTS", "").split(",") if host.strip() ]
+   →
+   ALLOWED_HOSTS = ['<your domain>',
+      'www.<your domain>',
+      '00.00.00.000',     #<your ip address>
+      '127.0.0.1',
+      'localhost',
+      ]
+```
 **[4]-A2-5 Django DB migration and static file collection**
 
 Continue with the above virtual environment active.
@@ -298,6 +310,7 @@ Continue with the above virtual environment active.
           sessions Running migrations:
          No migrations to apply.
 
+   (Set STATIC_ROOT)
          python manage.py collectstatic --noinput
          125 static files copied to '/opt/bitnami/projects/
          my-django-app/staticfiles'.
@@ -316,5 +329,6 @@ Continue with the above virtual environment active.
          Starting development server at http://0.0.0.0:8000/
          Quit the server with CONTROL-C.
 ```
+
 
 
