@@ -167,3 +167,25 @@ I used GitHub remote connection 3 or 4 years ago for CS50. I'll check it this ti
         drwxr-xr-x 5 bitnami bitnami 4096Nov 1
         11:48 venv
  ```
+### Note (10):
+#### Alternatively, run curl from another terminal while the virtual environment is active.
+```
+    bitnami@ip-172-26-15-83:~$ curl -I http://52.69.81.143:8000/
+        HTTP/1.1 200 OK
+        ...
+
+    Hello, Django!
+```
+### Note (11):
+#### Verifying Gunicorn installation
+```
+    ((venv) ) bitnami@ip-172-26-15-83:/opt/bitnami/projects/
+    my-django-app$ pip freeze | grep gunicorn
+        gunicorn==23.0.0
+```
+### Note (12):
+#### Methods other than sudo nano
+Even if I created it locally and tried to copy it using FTS, it would be rejected due to root privileges and wouldn't be able to be placed. So I intentionally placed it in the opt directory and moved it.
+```
+    sudo mv mydjango.service /etc/systemd/system/
+```
