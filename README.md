@@ -328,7 +328,75 @@ Continue with the above virtual environment active.
          'my_django_project.settings'
          Starting development server at http://0.0.0.0:8000/
          Quit the server with CONTROL-C.
+
+   ((venv) ) bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$ curl -I http://<00.00.00.000>:8000/
+      HTTP/1.1 200 OK
+      ...
+      Hello, Django!
 ```
+##### **References: Note (10)** Alternatively, run curl
+### **[4]-Procedure B**
+#### **[4]-A3 Django Settings (Second Half)**
+
+**[4]-A3-1 Gunicorn startup test and persistence**
+##### **References: Note (11)** Verifying Gunicorn installation
+Test Gunicorn startup
+```
+   gunicorn --bind 0.0.0.0:8000 my_django_project.wsgi
+   :application
+      ...
+      [2025-11-26 21:32:13 +0900] [918406] [INFO] Booting worker
+       with pid: 918406
+```
+Access http://00.00.00.000:8000/ and check if it displays.
+            \<Your IP address>
+
+**[4]-A3-2 Run Gunicorn as a resident service to automatically start it**
+
+Create mydjango.service: ChatGPT support
+```
+   [Unit]
+   Description=Gunicorn for my-django-app
+   After=network.target
+
+   [Service]
+   User=bitnami
+   Group=www-data
+   WorkingDirectory=/opt/bitnami/projects/my-django-app
+   Environment="PATH=/opt/bitnami/projects/my-django-app/venv/bin"
+   ExecStart=/opt/bitnami/projects/my-django-app/
+   venv/bin/gunicorn \
+      --workers 3 \
+      --bind unix:/opt/bitnami/projects/my-django-app/
+      gunicorn.sock \
+   my_django_project.wsgi:application
+
+   Restart=always
+
+   [Install]
+   WantedBy=multi-user.target
+```
+Place it in /etc/systemd/system/mydjango.service.
+##### **References: Note (12)** Methods other than sudo nano
+Execute sequentially over an SSH connection
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$
+   sudo systemctl daemon-reload
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$
+   sudo systemctl enable mydjango Created symlink
+      /etc/systemd/system/multi-user.target.wants/mydjango.service → /etc/systemd/system/mydjango.service.
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$
+   sudo systemctl start mydjango
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$
+   sudo systemctl status mydjango
+      ● mydjango.service - Gunicorn for my-django-app Loaded:
+      ．．．
+      Nov 27 12:15:25 ip-172-26-15-83 gunicorn[922395]: [2025-11-27 12:15:25 +0900] [>
+      lines 1-20/20 (END)
+
+  (Stop Gunicorn:) Ctrl + C 
+```
+
 
 
 
