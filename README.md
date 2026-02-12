@@ -79,7 +79,7 @@ cd C:\projects\< project directory >
 
 ```
 Check browser access via http://127.0.0.1:8000/ or http://localhost:8000/
-##### **References: Note (5) **　If the port is in use,
+##### **References: Note (5)**　If the port is in use,
 **[4]-A1-2 Log in to GitHub**
 ```
    <user name> /< project name >     Repository exists
@@ -137,7 +137,7 @@ The Django development server successfully starts on Codespaces
 ##### **References: Note (6)**  Bookmark the dedicated domain for opening the editor.
 **[4]-A1-7 GitHub integration (remote connection)**
 
-##### **References: Note (7) **　Confirming past experiences
+##### **References: Note (7)**　Confirming past experiences
 Confirm Git initial setup
 ```
    PS C:\projects\<project directory>> git --version
@@ -176,12 +176,12 @@ Confirm GitHub remote settings
    PS C:\projects\<project directory>> git push -u origin main
       …
 ```
-##### **References: Note (8) **  Git operations in VS Code
+##### **References: Note (8)**  Git operations in VS Code
 #### **[4]-A2 Preparation on AWS Lightsail**
 
 For information on creating and initializing a Bitnami Django instance, see [2] Creating an AWS Lightsail (Bitnami Django) instance.
 
-##### **References: Note (9) ** 　Verifying Completion
+##### **References: Note (9)** 　Verifying Completion
 **[4]-A2-1 Setting up Git on your Lightsail Django instance**
 
 Connect via SSH using PuTTY or the SSH button in the Lightsail instance's connection tab:
@@ -396,6 +396,7 @@ Execute sequentially over an SSH connection
 
   (Stop Gunicorn:) Ctrl + C 
 ```
+
 
 
 
