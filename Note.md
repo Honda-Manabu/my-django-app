@@ -189,3 +189,47 @@ Even if I created it locally and tried to copy it using FTS, it would be rejecte
 ```
     sudo mv mydjango.service /etc/systemd/system/
 ```
+### Note (13):
+#### Memo
+Coordinating Gunicorn and Apache proved difficult, leading to ChatGPT going around in circles and never arriving at a solution. Inductively, even after correcting the code, the old executable format remained in Apache, and ChatGPT's reasoning was riddled with errors, so one correction led to other errors. These factors combined to cause confusion, making it impossible to confirm the correct location. Another issue was a change in Bitnami's specifications, which caused the automatic update of bncert-tool to end with an error, resulting in an expired certificate (HTTP worked, but HTTPS was inaccessible).
+
+In conclusion, Gemini was able to help us solve this issue as well, but the crucial chat records were lost, making it impossible to trace the correct procedure. The chat with ChatGPT went on for so long that I began to organize the steps of the work I had done so far, trying to determine what had been completed and what hadn't. Partway through, I realized that it would be better to create a ReadMe.md file directly, and it looks like this process will take two months.
+### Note (14):
+#### caution
+If the procedure is correct from the beginning, there is no problem. However, if necessary corrections are missing, you may need to modify the code and clear the DNS cache in your browser and Windows. Alternatively, you can run the process in your browser's "private browsing mode," such as "Secret Mode" in Chrome.
+### Note (15):
+#### stumble
+ChatGPT also completely identified the cause on November 30, 2025. The SSL certificate expired on November 13, 2025. However, there were numerous incorrect answers and inconsistencies along the way. There was an underlying assumption that the certificate should be automatically renewed. Furthermore, while checking the update status, I was asked to view the full text of bitnami-ssl.conf, and when I did so, ChatGPT changed course and concluded that the cause was the .conf settings. I found myself going around in circles with no end in sight. After a month, I finally gave up and terminated the chat. As mentioned above, I solved the problem with Gemini. The response patterns were very similar, but ChatGPT seemed more opinionated, and Gemini seemed more trustworthy.
+
+After that, I tried running bncert-tool manually, but I'll skip that as it's off topic. For reference, I've included the Bitnami Django SSL auto-update setting Cron registration for "Standalone mode".
+```
+Bash
+    sudo nano /opt/bitnami/letsencrypt/renew-certificate.sh
+        #!/bin/bash
+
+        # 1. Apacheを停止してポート80を空ける
+        sudo /opt/bitnami/ctlscript.sh stop apache
+
+        # 2. SSL証明書の更新 (Standaloneモード)
+        # --http ポート80を使用して直接認証を行います
+        sudo /opt/bitnami/letsencrypt/lego
+         --path /opt/bitnami/letsencrypt \
+        --email="honda-m103742@coast.ocn.ne.jp" \
+        --domains="michealfamily.com" \
+        --http \
+        renew --days 30
+
+        # 3. Apacheを再起動（更新が成功しても失敗しても実行）
+        sudo /opt/bitnami/ctlscript.sh start apache
+
+    sudo chmod +x /opt/bitnami/letsencrypt/renew-certificate.sh
+
+    sudo crontab -u bitnami -e
+    (Replace the current line)
+        34 6 1 * * /opt/bitnami/letsencrypt/renew-certificate.sh > /opt/bitnami/letsencrypt/renewal.log 2>&1
+```
+Checking the update status
+```
+Bash
+    cat /opt/bitnami/letsencrypt/renewal.log
+```
