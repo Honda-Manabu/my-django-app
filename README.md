@@ -1,4 +1,8 @@
-﻿# My Django App
+﻿### **My project title**
+# **Generate My own Website**
+## **subtitle:** Creating a GitHub Codespaces development and production environment on an AWS LightSail Django instance.
+#### Video Demo:  <URL HERE>()
+#### Description:
 ## **Background of theme selection**
 Having just retired from a 40-year career as a corporate employee, I found myself living every day like a Sunday, eager to do something I hadn't been able to do before. Also, trying new things can help with anti-aging. I decided to become a web designer, but nine years later, my MySite is still under construction.
 
@@ -177,6 +181,7 @@ Confirm GitHub remote settings
       …
 ```
 ##### **References: Note (8)**  Git operations in VS Code
+
 #### **[4]-A2 Preparation on AWS Lightsail**
 
 For information on creating and initializing a Bitnami Django instance, see [2] Creating an AWS Lightsail (Bitnami Django) instance.
@@ -503,6 +508,7 @@ bash
 ```
 Check the connection.
 curl -I http://00.00.00.000/
+
 
 
 
