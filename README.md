@@ -396,6 +396,114 @@ Execute sequentially over an SSH connection
 
   (Stop Gunicorn:) Ctrl + C 
 ```
+##### **References: Note (13)** Memo
+ Regarding the following part [4]-A4, I cannot provide the execution procedure for the reasons mentioned above memo, so I will search for the current situation and present the work content.
+
+**[4]-A4-1 Django settings: Modify settings.py**
+
+Adding a static IP address of AWS Lightsail to [4]-A2-4 settings.py ALLOWED_HOSTS, was done at this point.
+Also check the following:
+```
+   settings.py
+      STATIC_URL = 'static/'
+      STATIC_ROOT = BASE_DIR / "staticfiles"
+```
+**[4]-A4-2 Modify /opt/bitnami/apache/conf/httpd.conf**
+```
+   Comment out "Include conf/extra/httpd-ssl.conf"
+```
+##### **References: Note (14)** caution
+### **warning:** Bitnami's default settings must be maintained on the following settings.
+Even if you try to replicate this section, various issues will arise depending on the environment and slight differences in settings.
+
+**[4]-A4-3 Create only one Django.conf file in /opt/bitnami/apache/conf/vhosts.**
+mydjango-vhost: (Name can be changed,conventionally, the project name is used.)
+```
+<VirtualHost *:80>
+    ServerName michealfamily.com
+    ServerAlias www.michealfamily.com
+
+    # 静的ファイル
+    Alias /static /opt/bitnami/projects/my-django-app/staticfiles
+    <Directory /opt/bitnami/projects/my-django-app/staticfiles>
+        Require all granted
+    </Directory>
+    # Gunicornへのプロキシ設定を安定化
+    <Proxy http://127.0.0.1:8000>
+        ProxySet timeout=60
+    </Proxy>
+
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:8000/
+    ProxyPassReverse / http://127.0.0.1:8000/
+    # Gunicorn UNIX socket
+    #ProxyPass / unix:/opt/bitnami/projects/my-django-app/gunicorn.sock|http://localhost/
+    #ProxyPassReverse / unix:/opt/bitnami/projects/my-django-app/gunicorn.sock|http://localhost/
+
+    ErrorLog "/opt/bitnami/apache/logs/mydjango-error.log"
+    CustomLog "/opt/bitnami/apache/logs/mydjango-access.log" combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName michealfamily.com
+    ServerAlias www.michealfamily.com
+
+    SSLEngine on
+    SSLCertificateFile "/opt/bitnami/letsencrypt/certificates/michealfamily.com.crt"
+    SSLCertificateKeyFile "/opt/bitnami/letsencrypt/certificates/michealfamily.com.key"
+    #SSLCertificateFile "/opt/bitnami/apache/conf/bitnami/certs/server.crt"
+    #SSLCertificateKeyFile "/opt/bitnami/apache/conf/bitnami/certs/server.key"
+    <Proxy http://127.0.0.1:8000>
+        ProxySet timeout=60
+    </Proxy>
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:8000/
+    ProxyPassReverse / http://127.0.0.1:8000/
+
+    #ProxyPass / unix:/opt/bitnami/projects/my-django-app/gunicorn.sock|http://localhost/
+    #ProxyPassReverse / unix:/opt/bitnami/projects/my-django-app/gunicorn.sock|http://localhost/
+
+    ErrorLog "/opt/bitnami/apache/logs/mydjango-error.log"
+    CustomLog "/opt/bitnami/apache/logs/mydjango-access.log" combined
+</VirtualHost>
+```
+ChatGPT's initial code is only eight lines long, but the original is Bitnami's default settings (the code to be modified below), and we created it to modify based on the log and error messages.
+
+**[4]-A4-4 Modify /opt/bitnami/apache/conf/bitnami/bitnami.conf**
+
+Of the 40 lines of code, only the fourth line remains; the rest all comment out. Add an Include line:
+bitnami.conf:
+```
+   EnvIf X-Forwarded-Proto https HTTPS=on
+   ．．．
+   Include "/opt/bitnami/apache/conf/vhosts/mydjango-vhost.conf"
+```
+**[4]-A4-5 Modifying bitnami-ssl.conf**
+
+Change the certificate directory and file name. Adding an ErrorDocument is optional.
+bitnami-ssl.conf：
+```
+   ．．．
+   SSLCertificateFile "/opt/bitnami/letsencrypt/certificates
+   /michealfamily.com.crt"
+   SSLCertificateKeyFile "/opt/bitnami/letsencrypt/certificates
+   /michealfamily.com.key"
+   ．．．
+   # Error Documents
+   ErrorDocument 503 /503.html
+```
+##### **References: Note (15)** stumble
+**[4]-A4-6 Check for Apache errors and restart**
+```
+bash
+   sudo apachectl -t
+      Syntax OK
+   sudo /opt/bitnami/ctlscript.sh restart apache
+      Restarted apache
+```
+Check the connection.
+curl -I http://00.00.00.000/
+
 
 
 
