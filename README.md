@@ -414,8 +414,13 @@ Also check the following:
       STATIC_ROOT = BASE_DIR / "staticfiles"
 ```
 **[4]-A4-2 Modify /opt/bitnami/apache/conf/httpd.conf**
+
+Comment out and Add last line
 ```
-   Comment out "Include conf/extra/httpd-ssl.conf"
+   # Secure (SSL/TLS) connections
+   # Include conf/extra/httpd-ssl.conf"
+   # Memory settings
+   Include "/opt/bitnami/apache/conf/bitnami/httpd.conf"
 ```
 ##### **References: Note (14)** caution
 ### **warning:** Bitnami's default settings must be maintained on the following settings.
@@ -477,6 +482,7 @@ ChatGPT's initial code is only eight lines long, but the original is Bitnami's d
 **[4]-A4-4 Modify /opt/bitnami/apache/conf/bitnami/bitnami.conf**
 
 Of the 40 lines of code, only the fourth line remains; the rest all comment out. Add an Include line:
+
 bitnami.conf:
 ```
    EnvIf X-Forwarded-Proto https HTTPS=on
@@ -486,6 +492,7 @@ bitnami.conf:
 **[4]-A4-5 Modifying bitnami-ssl.conf**
 
 Change the certificate directory and file name. Adding an ErrorDocument is optional.
+
 bitnami-ssl.conf：
 ```
    ．．．
@@ -508,6 +515,7 @@ bash
 ```
 Check the connection.
 curl -I http://00.00.00.000/
+
 
 
 
