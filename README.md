@@ -23,11 +23,13 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
 
 [4] Bitnami, Apache and Django deploying and configuring
 
-[5] Staging server environment generation, operation check, publication, and operational evaluation
+[5] A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL
 
-[6]Creating a Mysite and publishing it on the web - Renewing the CS50 Problem Set 8 Homepage with Flask.
+[6] Staging server environment generation, operation check, publication, and operational evaluation
 
-[7]Creating a final project submission and receiving a certificate of completion.
+[7]Creating a Mysite and publishing it on the web - Renewing the CS50 Problem Set 8 Homepage with Flask.
+
+[8]Creating a final project submission and receiving a certificate of completion.
 
 ##### **References: Note (1)**
 ## **Work Plan**
@@ -515,7 +517,10 @@ bash
 ```
 Check the connection.
 curl -I http://00.00.00.000/
-
+##### **References: Note (16)**
+### **[5]- A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL**
+### **[5]-B Migrating to a production-prerequisite database: PostgreSQL**
+#### **[5]-B1-1 Installing PostgreSQL**
 
 
 
