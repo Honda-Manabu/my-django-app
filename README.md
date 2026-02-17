@@ -517,10 +517,11 @@ bash
 ```
 Check the connection.
 curl -I http://00.00.00.000/
-##### **References: Note (16)**
+##### **References: Note (16)** Configuring for a Docker environment
 ### **[5]- A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL**
 ### **[5]-B Migrating to a production-prerequisite database: PostgreSQL**
 #### **[5]-B1-1 Installing PostgreSQL**
+
 
 
 
