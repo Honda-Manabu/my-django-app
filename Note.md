@@ -233,3 +233,6 @@ Checking the update status
 Bash
     cat /opt/bitnami/letsencrypt/renewal.log
 ```
+### Note (15):
+#### Configuring for a Docker environment
+Here I am again, moving from traditional to modern methods. I recommended AI three months ago, and now I'm being told it's a double whammy. It's inevitable in two ways. Generative AI is the reason I'm making progress. Similarly, talented developers around the world are speeding up and working on better automation. Meanwhile, I'm completely self-taught, and my 70-something brain has forgotten what I did three months ago. I thought Docker was a given, but ChatGPT pointed out my mistake. I chose to use SQLite as my database (still using SQLite) so I could focus on that while building my development environment. Now I'll correct course and move forward with the de facto standard configuration of Django + PostgreSQL. Hopefully, by the time this is over, I won't have to call it traditional again!
