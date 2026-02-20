@@ -520,7 +520,125 @@ curl -I http://00.00.00.000/
 ##### **References: Note (16)** Configuring for a Docker environment
 ### **[5]- A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL**
 ### **[5]-B Migrating to a production-prerequisite database: PostgreSQL**
+##### **References: Note (16)** Memo: Advice for my future self.
+#### **[5-B1-0] Understand the default configuration of PostgreSQL**
+(1) The default data directory in Bitnami is located at
+/bitnami/postgresql/data.
+
+(2) Bitnami configures a default superuser role with a name of postgres.
+```
+   Database username: postgres.
+   Database password: The same as the application password.
+```
+(3) The PostgreSQL configuration files will be located in the following paths:
+```
+   * PostgreSQL configuration settings file:
+   */opt/bitnami/postgresql/conf/postgresql.conf*
+   * PostgreSQL client authentication configuration file:
+   */opt/bitnami/postgresql/conf/pg_hba.conf*.
+```
+(4) The default port in which PostgreSQL listens is 5432.
+
+(5) Connect to PostgreSQL
+```
+(SSH Connection)
+   psql -U postgres
+   Password for user postgres:[](Display Blind)
+   django_db=>
+   \q
+```
+For more information, see the URL below and the links it contains.
+```
+   https://docs.bitnami.com/general/infrastructure/django/get-started/understand-default-config/
+ ```
 #### **[5]-B1-1 Installing PostgreSQL**
+SSH Connection
+
+Updating Package Information
+```
+   bitnami@ip-172-26-15-83:~$ sudo apt update
+   Get:1 file:/etc/apt/mirrors/debian.list Mirrorlist [38 B]
+   ...
+   Get:14 https://cdn-aws.deb.debian.org/debian-security bookworm-security/main amd    64 Packages [297 kB]
+   Fetched 1,275 kB in 1s (1,450 kB/s)
+   Reading package lists... Done
+   Building dependency tree... Done
+   Reading state information... Done
+   3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+```
+Install PostgreSQL and Related Packages
+```
+   bitnami@ip-172-26-15-83:~$ sudo apt install postgresql postgresql-contrib -y
+   Reading package lists... Done
+   ... (About 180 lines)
+   Processing triggers for libc-bin (2.36-9+deb12u13) ...
+```
+After this, I created a database and checked Name | Owner: django_db | django_user. However, it was decided to rebuild it in subsequent work. I don't understand what happened, and it may cause operational problems.
+#### **[5]-B1-2 Changed Django settings and modified settings.py**
+```
+settings.py modifications
+   DATABASES = {
+   'default': {
+   'ENGINE': 'django.db.backends.postgresql',
+   'NAME': 'django_db',
+   'USER': 'django_user',
+   'PASSWORD': 'HM31764713DB', 'HOST':
+   '127.0.0.1', 'PORT': '5432',
+      }
+   }
+```
+Preparation steps before running migrate.
+
+Trial and error process: I had to start over after a problem
+```
+   psql -U django_user -d django_db -h 127.0.0.1
+      Password for user django_user:
+      (Enter 'HM31764713DB')
+      psql: error: connection to server at "127.0.0.1", port 5432 failed: FATAL:  password authentication failed for user "django_user"
+   (Log in as administrator)
+   sudo -u postgres psql
+   (Again, I'm prompted for a password and can't proceed.)
+```
+```
+   (Searching for the initial postgres password)
+   cat /home/bitnami/bitnami_credentials
+   (Use the displayed password)
+   psql -U django_user -d django_db -h 127.0.0.1
+
+      psql (15.13)
+      Type "help" for help.
+
+      postgres=# ALTER USER django_user WITH PASSWORD 'HM31764713DB';
+      ERROR:  role "django_user" does not exist
+
+         postgres=# \du
+         (Not displayed)
+         postgres=# CREATE USER django_user WITH PASSWORD 'HM31764713DB';
+
+            CREATE ROLE
+         (Set django_user as owner)
+         postgres=# ALTER DATABASE django_db OWNER TO django_user;
+
+            ERROR:  database "django_db" does not exist
+
+         postgres=# CREATE DATABASE django_db OWNER django_user;
+
+            CREATE DATABASE
+         postgres=# \q
+```
+```
+   bitnami@ip-172-26-15-83:/$ psql -U django_user -d django_db -h 127.0.0.1
+      Password for user django_user:
+      (Enter 'HM31764713DB')
+      psql (15.13)
+      Type "help" for help.
+
+      django_db=>
+         \q
+```
+#### **[5]-B1-3 makemigrations & migrate**
+
+
 
 
 
