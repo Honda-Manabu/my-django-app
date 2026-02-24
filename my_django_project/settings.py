@@ -32,9 +32,15 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = [
-    host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
-]
+ALLOWED_HOSTS = ['michealfamily.com',
+    'www.michealfamily.com',
+    '52.69.81.143',
+    '127.0.0.1',
+    'localhost',
+    'web', # Dockerコンテナ名でのアクセスを許可
+    ]
+    #host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
+#]
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
 ]
@@ -85,8 +91,13 @@ WSGI_APPLICATION = 'my_django_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_db',
+        'USER': 'django_user',
+        'PASSWORD': 'HM31764713DB',
+        # Docker環境なら 'db'、それ以外なら '127.0.0.1' を使う設定
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'PORT': '5432',
     }
 }
 
