@@ -573,8 +573,54 @@ Install PostgreSQL and Related Packages
    ... (About 180 lines)
    Processing triggers for libc-bin (2.36-9+deb12u13) ...
 ```
-After this, I created a database and checked Name | Owner: django_db | django_user. However, it was decided to rebuild it in subsequent work. I don't understand what happened, and it may cause operational problems.
-#### **[5]-B1-2 Changed Django settings and modified settings.py**
+Check the PostgreSQL service status
+```
+   bitnami@ip-172-26-15-83:~$ sudo systemctl status postgresql
+   ● postgresql.service - PostgreSQL RDBMS Loaded:
+   …
+   Active: active (exited) since Wed 2026-02-18 20:42:47 JST; 4min 14s ago
+   …
+```
+#### **[5]-B1-2 Connect to PostgreSQL and create a role**
+SSH Connection Continued
+
+Switch to the postgres user and start psql
+```
+   bitnami@ip-172-26-15-83:~$ sudo -i -u postgres
+      sudo: unable to change directory to /home/postgres: No such file or directory
+      $
+
+      $ psql
+      postgres=#
+
+      postgres=# CREATE USER django_user WITH PassWORD 'HM31764713DB';
+         CREATE ROLE
+      postgres=# CREATE DATABASE django_db OWNER django_user;
+         CREATE DATABASE
+      postgres=# \q
+      $ exit
+      $ bitnami@ip-172-26-15-83:~$
+```
+At this point, ChatGPT did not understand the PostgreSQL rules in [5-B1-0], and the steps in [5]-B1-2 were ultimately ineffective. Using Gemini, I resolved the issue and decided to switch.
+
+Log in to the server
+```
+   Use the password shown below.
+      cat /home/bitnami/bitnami_credentials
+
+   (Role creation omitted)
+
+   bitnami@ip-172-26-15-83:/$ psql -U django_user -d django_db -h 127.0.0.1
+      Password for user django_user:
+      psql (15.13)
+      Type "help" for help.
+
+      django_db=>
+         \q (Finished or)
+         \c postgres → postgres=#
+```
+#### **[5]-B1-3 Changed Django settings and modified settings.py**
+Preparation steps before running migrate.
 ```
 settings.py modifications
    DATABASES = {
@@ -587,63 +633,5 @@ settings.py modifications
       }
    }
 ```
-Preparation steps before running migrate.
 
-Trial and error process: I had to start over after a problem
-```
-   psql -U django_user -d django_db -h 127.0.0.1
-      Password for user django_user:
-      (Enter 'HM31764713DB')
-      psql: error: connection to server at "127.0.0.1", port 5432 failed: FATAL:  password authentication failed for user "django_user"
-   (Log in as administrator)
-   sudo -u postgres psql
-   (Again, I'm prompted for a password and can't proceed.)
-```
-```
-   (Searching for the initial postgres password)
-   cat /home/bitnami/bitnami_credentials
-   (Use the displayed password)
-   psql -U django_user -d django_db -h 127.0.0.1
-
-      psql (15.13)
-      Type "help" for help.
-
-      postgres=# ALTER USER django_user WITH PASSWORD 'HM31764713DB';
-      ERROR:  role "django_user" does not exist
-
-         postgres=# \du
-         (Not displayed)
-         postgres=# CREATE USER django_user WITH PASSWORD 'HM31764713DB';
-
-            CREATE ROLE
-         (Set django_user as owner)
-         postgres=# ALTER DATABASE django_db OWNER TO django_user;
-
-            ERROR:  database "django_db" does not exist
-
-         postgres=# CREATE DATABASE django_db OWNER django_user;
-
-            CREATE DATABASE
-         postgres=# \q
-```
-```
-   bitnami@ip-172-26-15-83:/$ psql -U django_user -d django_db -h 127.0.0.1
-      Password for user django_user:
-      (Enter 'HM31764713DB')
-      psql (15.13)
-      Type "help" for help.
-
-      django_db=>
-         \q
-```
-#### **[5]-B1-3 makemigrations & migrate**
-
-
-
-
-
-
-
-
-
-
+#### **[5]-B1-4 Migration: Create a table on PostgreSQL.**
