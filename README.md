@@ -520,7 +520,7 @@ curl -I http://00.00.00.000/
 ##### **References: Note (16)** Configuring for a Docker environment
 ### **[5]- A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL**
 ### **[5]-B Migrating to a production-prerequisite database: PostgreSQL**
-##### **References: Note (16)** Memo: Advice for my future self.
+##### **References: Note (17)** Memo: Advice for my future self.
 #### **[5-B1-0] Understand the default configuration of PostgreSQL**
 (1) The default data directory in Bitnami is located at
 /bitnami/postgresql/data.
@@ -635,3 +635,243 @@ settings.py modifications
 ```
 
 #### **[5]-B1-4 Migration: Create a table on PostgreSQL.**
+SSH: Change to the project root directory
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$ python manage.py migrate
+      Operations to perform:
+        Apply all migrations: admin, auth, contenttypes, sessions
+      Running migrations:
+        Applying contenttypes.0001_initial... OK
+        ...
+        Applying sessions.0001_initial... OK
+```
+Create an administrator account
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/projects/my-django-app$ python manage.py createsuperuser
+      Username (leave blank to use 'bitnami'):
+         honda
+      Email address:
+         honda-m103742@coast.ocn.ne.jp
+      Password:            (Not displayed)
+      Password (again):
+      Superuser created successfully.
+```
+Start the development server and verify operation
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   python manage.py runserver
+      Watching for file changes with StatReloader
+      Performing system checks...
+
+      System check identified no issues (0 silenced).
+      Error: That port is already in use.　(Note*)
+
+   Access http://127.0.0.1:8000/
+      Hello, Django!
+```
+##### **References: Note (18)**  (Note *)What the error means
+
+After the countermeasure：Verify the integration (read/write) between Django and PostgreSQL
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   python manage.py runserver 0.0.0.0:8001
+```
+Access http://52.69.81.143:8001/admin
+
+Launch the admin page. Add a new test user, and it will appear in the list, and the details screen will also be displayed.
+### **[5]-C Docker installation**
+### **[5]-C1 Preparation work**
+#### **[5]-C1-1 Creating a Docker blueprint (Dockerfile)**
+Create it in the project's root directory (Created by Gemini)
+```
+Dockerfile
+   # 1. ベースとなる画像（Python 3.12）
+   FROM python:3.12-slim
+   # 2. 環境変数の設定（Pythonがログを即座に出力するようにする）
+   ENV PYTHONDONTWRITEBYTECODE 1
+   ENV PYTHONUNBUFFERED 1
+   # 3. コンテナ内の作業ディレクトリを作成・設定
+   WORKDIR /app
+   # 4. 依存関係のインストールに必要なシステムパッケージを導入（PostgreSQL用）
+   RUN apt-get update && apt-get install -y \
+      libpq-dev \
+      gcc \
+      && rm -rf /var/lib/apt/lists/*
+   # 5. requirements.txtをコピーしてライブラリをインストール
+   COPY requirements.txt /app/
+   RUN pip install --no-cache-dir -r requirements.txt
+   # PostgreSQL接続用のライブラリを追加でインストール
+   RUN pip install psycopg2-binary
+   # 6. プロジェクトの全ファイルをコンテナにコピー
+   COPY . /app/
+   # 7. Djangoを起動するコマンド　（本番環境ではgunicorn に書き換え）
+   CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+```
+#### **[5]-C1-2 Create a configuration file (docker-compose.yml) for launching containers**
+Connect both the "Django" and "PostgreSQL" containers
+Create this in the project's root directory, just like the Dockerfile (Created by Gemini)
+```
+docker-compose.yml
+   version: '3.8'
+   services:
+      db:
+         image: postgres:15
+         volumes:
+            - postgres_data:/var/lib/postgresql/data/
+         environment:
+            - POSTGRES_DB=your_db_name
+            - POSTGRES_USER=your_user_name
+            - POSTGRES_PASSWORD=your_password
+      web:
+         build: .
+         command: python manage.py runserver 0.0.0.0:8000
+         volumes:
+            - .:/app
+         ports:
+            - "8001:8000"
+         depends_on:
+            - db
+         environment:
+            - DATABASE_HOST=db your_user_name:your_password@db:5432/your_db_name
+   volumes:
+      postgres_data:
+```
+#### **[5]-C1-3 Modify settings.py**
+```
+Python
+   import os
+   (--- omitted ---)
+   ALLOWED_HOSTS = [
+      (--- omitted ---)
+      'web',  # Dockerコンテナ名でのアクセスを許可
+   ]
+   (--- omitted ---)
+   DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_db',
+        'USER': 'django_user',
+        'PASSWORD': 'HM31764713DB',
+        # Docker環境なら 'db'、それ以外なら '127.0.0.1' を使う設定
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'PORT': '5432',
+      }
+   }
+```
+#### **[5]-C1-4 Push and pull the entire program from the server to my local machine via GitHub**
+First, describe the push process
+
+Fix any errors in the Git initial settings (commit signatures)
+```
+Bash
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   git config --global user.email
+   "honda-m103742@coast.ocn.ne.jp"
+
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   git config --global user.name "honda"
+
+```
+Set the merge method to "merge," incorporate and merge the changes from GitHub, then stage and commit the changes
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   git pull origin main
+      remote: Enumerating objects: 68, done.
+      ...
+      hint: invocation.
+      fatal: Need to specify how to reconcile divergent branches.
+
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$ git add .
+
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   git commit -m "Migrate to PostgreSQL and add Docker config"
+      [main 1d24293] Migrate to PostgreSQL and add Docker config
+      4 files changed, 71 insertions(+), 5 deletions(-)
+      create mode 100644 Dockerfile
+      create mode 100644 docker-compose.yml
+```
+And then push to GitHub
+```
+   bitnami@ip-172-26-15-83:/opt/bitnami/
+   projects/my-django-app$
+   git push origin main
+      Enumerating objects: 17, done.
+      ...
+      To github.com:Honda-Manabu/my-django-app.git
+         6d2208c..194c7e4  main -> main
+```
+#### **[5]-C1-5 Install Docker Desktop (AMD64)**
+https://www.docker.com/ja-jp/products/docker-desktop/
+
+Download and run Installer.exe
+
+After installation is complete, you'll be prompted to reboot
+
+After rebooting, the "WSL 2 installation" will automatically launch, so select Run. Once finished, Docker will launch and the initial screen will appear
+##### **References: Note (19)** Go through the account creation process
+On the dashboard (the screen with the whale icon), when the status bar says "Engine running" (green), you're ready to go.
+
+
+#### **[5]-C1-6 Create a working folder for linking to the GitHub repository**
+Open that folder(C:\django-docker-project) in Vs Code and open a terminal.
+```
+PowerShell
+   PS C:\projects\django-docker-project> git clone https://github.com/Honda-Manabu/my-django-app.git .
+      Cloning into '.'...
+      remote: Enumerating objects: 122, done.
+      ...
+      Resolving deltas: 100% (58/58), done.
+```
+##### **References: Note (20)** Created previously (get the latest version):
+### **[5]-C2 Starting Docker**
+#### **[5]-C2-1 Starting Docker for the first time**
+##### **References: Note (21)** docker-compose roles and commands
+```
+PowerShell
+   PS C:\projects\django-docker-project>
+   docker compose up --build
+      time="2026-02-24T13:09:27+09:00"
+      level=warning msg="C:\\projects\\django-docker-project\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+      [+] up 12/17
+      [+] up 12/17. [⣿⣿⣿⣿⠀⣿⠀⣿⣿⣿⣿⣿⠀⡀⣿⣿] 12.64MB / 162.5MB Pulling
+      ...
+      web-1  |
+      db-1   | 2026-02-24 04:15:34.068 UTC [62] LOG:  checkpoint starting: time
+```
+Open another terminal while in the above state.
+
+            (Let your PC rest　Ctrl + C)
+#### **[5]-C2-2 Create a table in an empty PostgreSQL database**
+```
+PowerShell
+   PS C:\projects\django-docker-project> docker compose exec web python manage.py migrate
+      time="2026-02-24T13:19:59+09:00" level=warning msg=
+      ...
+      Running migrations:
+         Applying contenttypes.0001_initial... OK
+         ...
+         Applying sessions.0001_initial... OK
+```
+   Access http://localhost:8001
+
+      Hello, Django!
+#### **[5]-C2-3 Create an administrator user for the local environment**
+```
+PowerShell
+   PS C:\projects\django-docker-project> docker compose exec web python manage.py createsuperuser
+      time="2026-02-24T13:22:32+09:00" level=warning msg="C:\\projects\\django-docker-project\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+      Username (leave blank to use 'root'): R-Honda
+      Email address: honda-m103742@coast.ocn.ne.jp
+      Password: 　　　　　　　　　　　（Hon1953M）
+      Password (again):
+   Superuser created successfully.
+```
+   Access http://localhost:8001/admin
