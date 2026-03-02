@@ -233,10 +233,44 @@ Checking the update status
 Bash
     cat /opt/bitnami/letsencrypt/renewal.log
 ```
-### Note (15):
+### Note (16):
 #### Configuring for a Docker environment
 Here I am again, moving from traditional to modern methods. I recommended AI three months ago, and now I'm being told it's a double whammy. It's inevitable in two ways. Generative AI is the reason I'm making progress. Similarly, talented developers around the world are speeding up and working on better automation. Meanwhile, I'm completely self-taught, and my 70-something brain has forgotten what I did three months ago. I thought Docker was a given, but ChatGPT pointed out my mistake. I chose to use SQLite as my database (still using SQLite) so I could focus on that while building my development environment. Now I'll correct course and move forward with the de facto standard configuration of Django + PostgreSQL. Hopefully, by the time this is over, I won't have to call it traditional again!
-### Note (16):
+### Note (17):
 #### Memo: Advice for my future self.
 Why do I make the same mistakes over and over again? I started working on PostgreSQL without any prior knowledge, and after six hours of struggling, I was left feeling dazed and at a loss. Often, it's only after I've failed that I realize what I should have done. When you first see the documentation, you're overwhelmed by the sheer volume of it. The first page is nested multiple times, and the same goes for the nested parts, so no amount of time will allow you to digest it. However, after struggling for a long time and not being able to get to it, when I look at it, I find it's incredibly well-organized.
 In conclusion, it's okay not to understand it; just skim through the basics of the documentation. That way, you'll be able to ask the generative AI the right questions. Long records can't be referenced later. Most things can be solved with a search.
+### Note (18):
+#### (Note *)What the error means
+
+It turns out that Django (or Apache) was using old settings.
+Error accessing the Django admin panel
+```
+Bash
+    python manage.py shell
+    >>> from django.contrib.auth.models import User
+    >>> User.objects.filter(username='honda').exists()
+        True
+    >>> exit()  (Enter)
+```
+As a countermeasure, change the port 8000 registration in the AWS Lightsail instance's networking tag to 8000-8001
+### Note (19):
+#### Go through the account creation process
+
+I created an account, but for some reason I couldn't log in due to a password error. I selected "Docker Personal (Free)" and chose "Continue without signing in."
+### Note (20):
+#### Created previously (get the latest version):
+```
+PowerShell
+    git pull origin main.
+```
+### Note (21):
+#### docker-compose roles and commands
+Build: Create a Python environment image based on the Dockerfile.
+Pull: Download the PostgreSQL image from the official website.
+Run: Start the Django container (web) and the PostgreSQL container (db) simultaneously.
+```
+    To stop: docker-compose down.
+    To run in the background: docker-compose up -d.
+    To view container logs: docker-compose logs -f.
+```
