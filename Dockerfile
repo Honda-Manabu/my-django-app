@@ -24,4 +24,6 @@ RUN pip install psycopg2-binary
 COPY . /app/
 
 # 7. Djangoを起動するコマンド
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# gunicornを起動:テスト時はdocker-compose.ymlで置き換わる
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "my_django_project.wsgi:application"]

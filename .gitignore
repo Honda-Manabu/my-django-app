@@ -1,22 +1,22 @@
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-
+*$py.class
 # Virtual environments
 venv/
+.venv/
 
 # Django migrations
 *.sqlite3
 *.log
-*.pot
-*.pyc
-db.sqlite3
-/staticfiles/
+media/
+staticfiles/
 
 # Environment variables
 .env
+
+# Docker
+.docker/
 
 # VS Code settings
 .vscode/
