@@ -14,7 +14,7 @@ After eight years of research and research, where new things replaced the actual
 ### **It also marks the culmination of nine years of struggling with web-related software.**
 
 The project I'm sharing here was decided after numerous questions to ChatGPT. However, since starting this project, I've realized that the wonderful world of open source software can be very difficult for beginners, with so many different versions and approaches. For example, the official documentation for setting up Apache web server software on an AWS Bitnami-Django instance is often difficult to understand and extremely incomplete. It's impossible to complete without the help of generative AI. So, by recording my detours and what works well in this project, I hope to inspire freeware developers to automate their own projects.
-# **Step1: Project overview**
+## **Project overview**
 [1] Preparing the local Code development environment
 
 [2] Building a Lightsail instance & the Django online app settings
@@ -23,11 +23,15 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
 
 [4] Bitnami, Apache and Django deploying and configuring
 
-[5] A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL
+[5] Dockerization, DB switching to a PostgreSQL and GitHub push pull
 
-[6] Staging server environment generation, operation check, publication, and operational evaluation
+   (Docker:environment running Linux-based software on Windows)
+      
+[6] Staging server environment generation, operation check, publication, 
+   and operational evaluation
 
-[7]Creating a Mysite and publishing it on the web - Renewing the CS50 Problem Set 8 Homepage with Flask.
+[7]Creating a Mysite and publishing it on the web - 
+   Renewing the CS50 Problem Set 8 Homepage with Flask.
 
 [8]Creating a final project submission and receiving a certificate of completion.
 
@@ -875,3 +879,162 @@ PowerShell
    Superuser created successfully.
 ```
    Access http://localhost:8001/admin
+### **[5]-C3　Reorganize GitHub operations**
+#### **[5]-C3-1 Data and environment-dependent values ​​are not pushed to GitHub**
+Exclude them from management using the .gitignore file.
+```
+.gitignore
+   # Python
+   __pycache__/
+   *.py[cod]
+   *$py.class
+   # Virtual environments
+   venv/
+   .venv/
+
+   # Django migrations
+   *.sqlite3
+   *.log
+   media/
+   staticfiles/
+
+   # Environment variables
+   .env
+
+   # Docker
+   .docker/
+
+   # VS Code settings
+   .vscode/
+   *.swp
+   # OS-specific files
+   .DS_Store
+   Thumbs.db
+```
+Remove SQLite:Now that PostgreSQL is running, delete the unnecessary db.sqlite3.
+```
+rm db.sqlite3
+```
+Delete cache.
+```
+   PS C:\projects\django-docker-project>
+   git rm -r --cached db.sqlite3
+```
+**[5]-C3-2 In addition to source code, configuration files are also pushed to GitHub**
+
+However, for security reasons, secret keys, database passwords, etc. should be stored in environment variables and excluded from being pushed.
+
+Modify settings.py
+```
+Python
+   (--- omitted ---)
+   # SECURITY WARNING: keep the secret key used in production secret!
+   SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
+
+   # SECURITY WARNING: don't run with debug turned on in production!
+   DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+
+   ALLOWED_HOSTS = ['michealfamily.com',
+      'www.michealfamily.com',
+      '52.69.81.143',
+      '127.0.0.1',
+      'localhost',
+      'web', # Dockerコンテナ名でのアクセスを許可
+      ]
+      #host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
+      #]
+      CSRF_TRUSTED_ORIGINS = [
+         origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
+      ]
+   (--- omitted ---)
+      DATABASES = {
+         'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'django_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'django_user'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'HM31764713DB'),
+            # Docker環境なら 'db'、それ以外なら '127.0.0.1' を使う設定
+            #'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+            'HOST': os.environ.get('DATABASE_HOST', 'db'),
+            'PORT': os.environ.get('DATABASE_PORT', '5432'),
+         }
+      }
+```
+**[5]-C3-3 Create an .env file and update it to docker-compose.yml**
+
+Create a .env file for Gemini as an example
+```
+.env
+   # Django基本設定
+   DJANGO_SECRET_KEY='HM31764713DB'
+   DJANGO_DEBUG=False
+   DJANGO_ALLOWED_HOSTS=michealfamily.com,www.michealfamily.com,52.69.81.143,web
+
+   # CSRF設定
+   DJANGO_CSRF_TRUSTED_ORIGINS=https://michealfamily.com,https://www.michealfamily.com
+
+   # データベース接続情報
+   DATABASE_HOST=db
+   DATABASE_PORT=5432
+   POSTGRES_DB=django_db
+   POSTGRES_USER=django_user
+   POSTGRES_PASSWORD=HM31764713DB
+```
+```
+docker-compose.yml
+   (--- omitted ---)
+   web:
+    build: .
+    env_file:         # --- Add these two lines
+      - .env          # ---
+    command:
+    (--- omitted ---)
+```
+**[5]-C3-4 Rebuild and start the Docker container**
+
+Now that Docker is running, modify the Dockerfile from development to production (Gunicorn).
+See the last line in [5]-C1-1.
+```
+Dockerfile
+   (--- omitted ---)
+   # 7.Start Gunicorn.
+   CMD ["gunicorn", "--bind", "0.0.0.0:8000", "my_django_project.wsgi:application"]
+```
+Attention！
+```
+Make sure gunicorn is included in requirements.txt.
+Start Docker Desktop and check that the green "Engine running" appears in the lower left.
+```
+Restart the Docker container.
+```
+Bash
+   PS C:\projects\django-docker-project> docker-compose down
+   ...
+   PS C:\projects\django-docker-project> docker-compose up -d --build
+      time="2026-03-04T01:12:19+09:00" ...
+      ...
+      #14 DONE 0.0s
+      [+] up 2/2
+      ✔ Image django-docker-project-web       Built                                                                                       3.3s
+      ✔ Container django-docker-project-web-1 Recreated                                                                                   0.2s
+```
+#### **[5]-C3-5 Push the changes to GitHub**
+Add all changed, deleted, and new files to the staging area and commit. → Push to GitHub.
+```
+Bash
+   PS C:\projects\django-docker-project> git add .
+   PS C:\projects\django-docker-project> git commit -m "Complete Docker setup with .env support and CSRF fix"
+      [main e52e203] Complete Docker setup with .env support and CSRF fix
+      5 files changed, 20 insertions(+), 15 deletions(-)
+      delete mode 100644 db.sqlite3
+   PS C:\projects\django-docker-project> git push origin main
+      Enumerating objects: 15, done.
+      Counting objects: 100% (15/15), done.
+      Delta compression using up to 12 threads
+      Compressing objects: 100% (9/9), done.
+      Writing objects: 100% (9/9), 1.19 KiB | 1.19 MiB/s, done.
+      Total 9 (delta 7), reused 0 (delta 0), pack-reused 0 (from 0)
+      remote: Resolving deltas: 100% (7/7), completed with 6 local objects.
+      To https://github.com/Honda-Manabu/my-django-app.git
+         5c972a5..d61d1a3  main -> main
+```
