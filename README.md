@@ -1038,3 +1038,51 @@ Bash
       To https://github.com/Honda-Manabu/my-django-app.git
          5c972a5..d61d1a3  main -> main
 ```
+### **[6] Staging server environment generation, operation check, publication,and operational evaluation**
+### **[6]-C Staging server environment generation**
+#### **[6]-C1 Creating a New Instance in Lightsail**
+Log in to AWS and select Lightsail from the menu. Create a new instance for staging.
+Here, I made two mistakes.
+```
+The correct procedure is
+   Click the orange "Create Instance" button
+   in the upper right corner of an existing instance.
+   SSH Key: Display and select the default SSH key options.
+```
+Since I created it from a snapshot of an existing instance and didn't know how to use the default SSH key, I had to reconfigure PuTTY and FileZilla, which I could use as-is. Since the internal .git settings were still in the state used by the old instance, I had to delete the created directory in order to perform a GitHub clone.
+
+Initializing a New Instance
+```
+   Assigning a Static IP and Domain
+   SSL Certificate: Running bncert-tool
+```
+For information on automatic SSL certificate renewal, please refer to the latter half of Note(15).
+```
+    (Replace the current line)
+        30 6 1 * * /opt/bitnami/letsencrypt/renew-certificate.sh > /opt/bitnami/letsencrypt/renewal.log 2>&1 >
+bitnami@ip-172-26-2-244:~$ sudo /opt/bitnami/letsencrypt/renew-certificate.sh
+NAME:
+   lego - Let's Encrypt client written in Go
+USAGE:
+   lego [global options] command [command options]
+VERSION:
+   4.15.0
+．．．
+print the version
+/opt/bitnami/letsencrypt/renew-certificate.sh: 7: --path: not found
+https://blog-michaeljp.net/ Display OK
+```
+
+#### **[6]-C2-1 Clone from GitHub to the Staging Server**
+See below for the procedure and contents:
+
+   [4]-A2-2 Generating SSH keys
+
+Creating directories and setting permissions
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ sudo mkdir -p /opt/bitnami/projects
+   bitnami@ip-172-26-2-244:~$ sudo chown $USER:$USER /opt/bitnami/projects
+```
+   [4]-A2-3 Cloning GitHub
+#### **[6]-C2-1 Creating the .env file that is not created during cloning**
