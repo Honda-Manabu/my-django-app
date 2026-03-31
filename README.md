@@ -1086,3 +1086,63 @@ Bash
 ```
    [4]-A2-3 Cloning GitHub
 #### **[6]-C2-1 Creating the .env file that is not created during cloning**
+Final form of the .env file: See [5]-C3-3
+```
+Changes: ① Copy and paste the entire pemkey display
+         ② Domain name for DJANGO_ALLOWED_HOSTS
+            and CSRF settings
+```
+#### **[6]-C2-2 Create the image with the docker build command**
+##### **References: Note (22)** Without using docker-compose
+Perform docker build directly on the "host network"
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$
+   sudo docker build --network=host -t my-django-app-web .
+
+   [+] Building 18.9s (12/12) FINISHED
+   (The rest is omitted.)
+   (The DNS settings inside Docker were a bottleneck, causing repeated errors that took over 1000 seconds, but it finished in less than 20 seconds.)
+```
+#### **[6]-C2-3 Starting the application, migration, and checking browser access**
+Container startup
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose up -d
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+   ...
+   ✔ Container my-django-app-web-1      Started                               0.9s
+```
+Database reflection
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py migrate
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   Operations to perform:
+   ...
+   Applying sessions.0001_initial... OK
+```
+Static file aggregation
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py collectstatic --noinput
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   125 static files copied to '/app/staticfiles'.
+```
+Final verification: Successful browser access
+```
+   http://blog-michaeljp.net:8001
+
+   http://blog-michaeljp.net:8001/admin
+```
+#### **[6]-C2-4 Create an administrator account**
+[5]-C2-3 See reference, creation is OK with the same username and password.
+```
+Bash
+   docker compose exec web python manage.py createsuperuser
+```
