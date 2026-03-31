@@ -277,3 +277,15 @@ Docker Desktop must be in "Engine Running" state while performing any Docker-rel
     To run in the background: docker-compose up -d
     To view container logs: docker-compose logs -f
 ```
+### Note (22):
+#### Without using docker-compose
+Currently, Bitnami's standard services are already running on the host side.
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ sudo /opt/bitnami/ctlscript.sh status
+      apache already running
+      mariadb already running
+      postgresql already running
+```
+If you start Django (my-django-app) with Docker as is, a port conflict will occur. Therefore, the AI ​​instructs me to stop the Bitnami service (sudo /opt/bitnami/ctlscript.sh stop), stop and restart the Docker container.
+This doesn't work no matter how many times I correct the .env and Docker settings.Nearly 20,000 characters of wasted communication occurred over several days. Ultimately, the correct solution was to run docker build directly on the "host network" without going through docker-compose.
