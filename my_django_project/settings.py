@@ -32,13 +32,14 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['michealfamily.com',
-    'www.michealfamily.com',
-    '52.69.81.143',
+ALLOWED_HOSTS = [
+    'blog-michaeljp.net',      
+    'www.blog-michaeljp.net',
+    #'35.75.58.24',             
     '127.0.0.1',
     'localhost',
-    'web', # Dockerコンテナ名でのアクセスを許可
-    ]
+    'web',  
+]
     #host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
 #]
 CSRF_TRUSTED_ORIGINS = [
@@ -85,6 +86,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'my_django_project.wsgi.application'
 
+# プロキシ経由のHTTPS接続を正しく判定するための設定
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
