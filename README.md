@@ -1038,3 +1038,111 @@ Bash
       To https://github.com/Honda-Manabu/my-django-app.git
          5c972a5..d61d1a3  main -> main
 ```
+### **[6] Staging server environment generation, operation check, publication,and operational evaluation**
+### **[6]-C Staging server environment generation**
+#### **[6]-C1 Creating a New Instance in Lightsail**
+Log in to AWS and select Lightsail from the menu. Create a new instance for staging.
+Here, I made two mistakes.
+```
+The correct procedure is
+   Click the orange "Create Instance" button
+   in the upper right corner of an existing instance.
+   SSH Key: Display and select the default SSH key options.
+```
+Since I created it from a snapshot of an existing instance and didn't know how to use the default SSH key, I had to reconfigure PuTTY and FileZilla, which I could use as-is. Since the internal .git settings were still in the state used by the old instance, I had to delete the created directory in order to perform a GitHub clone.
+
+Initializing a New Instance
+```
+   Assigning a Static IP and Domain
+   SSL Certificate: Running bncert-tool
+```
+For information on automatic SSL certificate renewal, please refer to the latter half of Note(15).
+```
+    (Replace the current line)
+        30 6 1 * * /opt/bitnami/letsencrypt/renew-certificate.sh > /opt/bitnami/letsencrypt/renewal.log 2>&1 >
+bitnami@ip-172-26-2-244:~$ sudo /opt/bitnami/letsencrypt/renew-certificate.sh
+NAME:
+   lego - Let's Encrypt client written in Go
+USAGE:
+   lego [global options] command [command options]
+VERSION:
+   4.15.0
+．．．
+print the version
+/opt/bitnami/letsencrypt/renew-certificate.sh: 7: --path: not found
+https://blog-michaeljp.net/ Display OK
+```
+
+#### **[6]-C2-1 Clone from GitHub to the Staging Server**
+See below for the procedure and contents:
+
+   [4]-A2-2 Generating SSH keys
+
+Creating directories and setting permissions
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ sudo mkdir -p /opt/bitnami/projects
+   bitnami@ip-172-26-2-244:~$ sudo chown $USER:$USER /opt/bitnami/projects
+```
+   [4]-A2-3 Cloning GitHub
+#### **[6]-C2-1 Creating the .env file that is not created during cloning**
+Final form of the .env file: See [5]-C3-3
+```
+Changes: ① Copy and paste the entire pemkey display
+         ② Domain name for DJANGO_ALLOWED_HOSTS
+            and CSRF settings
+```
+#### **[6]-C2-2 Create the image with the docker build command**
+##### **References: Note (22)** Without using docker-compose
+Perform docker build directly on the "host network"
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$
+   sudo docker build --network=host -t my-django-app-web .
+
+   [+] Building 18.9s (12/12) FINISHED
+   (The rest is omitted.)
+   (The DNS settings inside Docker were a bottleneck, causing repeated errors that took over 1000 seconds, but it finished in less than 20 seconds.)
+```
+#### **[6]-C2-3 Starting the application, migration, and checking browser access**
+Container startup
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose up -d
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+   ...
+   ✔ Container my-django-app-web-1      Started                               0.9s
+```
+Database reflection
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py migrate
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   Operations to perform:
+   ...
+   Applying sessions.0001_initial... OK
+```
+Static file aggregation
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py collectstatic --noinput
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   125 static files copied to '/app/staticfiles'.
+```
+Final verification: Successful browser access
+```
+   http://blog-michaeljp.net:8001
+
+   http://blog-michaeljp.net:8001/admin
+```
+#### **[6]-C2-4 Create an administrator account**
+[5]-C2-3 See reference, creation is OK with the same username and password.
+```
+Bash
+   docker compose exec web python manage.py createsuperuser
+```
