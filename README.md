@@ -1146,3 +1146,45 @@ Final verification: Successful browser access
 Bash
    docker compose exec web python manage.py createsuperuser
 ```
+#### **[6]-C3 Preparing for Automated System Development Environment Deployment**
+This final project is finally approaching its conclusion. Our conversations with the generating AI, driven by the desire for environmental convenience, have been fraught with unexpected procedures and repeated retries. Before embarking on the final steps towards even better environmental management, it's wise to clear out the folders and files that have become unnecessary due to the implementation of the latest, more advanced procedures—the "junk"—that we've used up to this point to master the existing procedures.
+#### **[6]-C3-1 Starting from a fully synchronized state of GitHub repository, production server, and staging server**
+These are the steps we will follow.As a prerequisite, both the production and staging servers have snapshots for the past week. (AWS settings)
+```
+   1)Currently, the local C:\projects\django-docker-project and the staging server are synchronized. The AI ​​is now assisting in finding unnecessary folders and files on the staging server.
+   2)Manual deletion of unnecessary folders and files outside of Git management on the staging server
+   3)Staging server Push, GitPull
+   4)Clear production server directory and Gitclone
+   5)Manual deletion of unnecessary folders and files outside of Git management on the production server
+```
+#### **[6]-C3-2　Delete virtual environments, caches, and logs in bulk**
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ rm -rf venv/ .venv/ staticfiles/ *.log db.sqlite3
+
+   bitnami@ip-172-26-2-244:~$ find . -name "__pycache__" -type d -exec rm -rf {} +
+      find: ‘./.lego’: Permission denied
+```
+#### **[6]-C3-3 Manual deletion on the staging server**
+```
+Files that were backed up before the fix and whose contents are now outdated:
+          *.back.*
+Remnants: /opt/bitnami/projects/my-django-app/my_django_project/conf/bitnami
+          /opt/bitnami/projects/my-django-app/myapp
+```
+#### **[6]-C3-4 Staging, Commit, Push, Pull**
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git add -A
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config --global user.email "honda-m103742@coast.ocn.ne.jp"
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config --global user.name "Honda-Manabu"
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git commit -m "Cleanup: Remove legacy files and system-side debris"
+      [main 3d5f9ef] Cleanup: Remove legacy files and system-side debris
+      13 files changed, 13 insertions(+), 173 deletions(-)
+      ...
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config pull.rebase false
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git push origin main
+      Enumerating objects: 18, done.
+      ...
+         ae344c5..0333f71  main -> main
+```
