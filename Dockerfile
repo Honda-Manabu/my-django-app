@@ -9,7 +9,6 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # 4. 依存関係のインストールに必要なシステムパッケージを導入（PostgreSQL用）
-<<<<<<< HEAD
 RUN apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends \
     libpq-dev \
@@ -17,11 +16,6 @@ RUN apt-get update --fix-missing && \
     libc-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-=======
-RUN apt-get update && apt-get install -y libpq-dev 
-    
->>>>>>> f8af3c0b8da8e14916ae2e6f7326e470d73e0413
 # 5. requirements.txtをコピーしてライブラリをインストール
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
