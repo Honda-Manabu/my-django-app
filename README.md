@@ -14,7 +14,7 @@ After eight years of research and research, where new things replaced the actual
 ### **It also marks the culmination of nine years of struggling with web-related software.**
 
 The project I'm sharing here was decided after numerous questions to ChatGPT. However, since starting this project, I've realized that the wonderful world of open source software can be very difficult for beginners, with so many different versions and approaches. For example, the official documentation for setting up Apache web server software on an AWS Bitnami-Django instance is often difficult to understand and extremely incomplete. It's impossible to complete without the help of generative AI. So, by recording my detours and what works well in this project, I hope to inspire freeware developers to automate their own projects.
-# **Step1: Project overview**
+## **Project overview**
 [1] Preparing the local Code development environment
 
 [2] Building a Lightsail instance & the Django online app settings
@@ -23,11 +23,15 @@ The project I'm sharing here was decided after numerous questions to ChatGPT. Ho
 
 [4] Bitnami, Apache and Django deploying and configuring
 
-[5] A Docker environment running Linux-based software on Windows and DB switching to a PostgreSQL
+[5] Dockerization, DB switching to a PostgreSQL and GitHub push pull
 
-[6] Staging server environment generation, operation check, publication, and operational evaluation
+   (Docker:environment running Linux-based software on Windows)
+      
+[6] Staging server environment generation, operation check, publication, 
+   and operational evaluation
 
-[7]Creating a Mysite and publishing it on the web - Renewing the CS50 Problem Set 8 Homepage with Flask.
+[7]Creating a Mysite and publishing it on the web - 
+   Renewing the CS50 Problem Set 8 Homepage with Flask.
 
 [8]Creating a final project submission and receiving a certificate of completion.
 
@@ -875,3 +879,312 @@ PowerShell
    Superuser created successfully.
 ```
    Access http://localhost:8001/admin
+### **[5]-C3　Reorganize GitHub operations**
+#### **[5]-C3-1 Data and environment-dependent values ​​are not pushed to GitHub**
+Exclude them from management using the .gitignore file.
+```
+.gitignore
+   # Python
+   __pycache__/
+   *.py[cod]
+   *$py.class
+   # Virtual environments
+   venv/
+   .venv/
+
+   # Django migrations
+   *.sqlite3
+   *.log
+   media/
+   staticfiles/
+
+   # Environment variables
+   .env
+
+   # Docker
+   .docker/
+
+   # VS Code settings
+   .vscode/
+   *.swp
+   # OS-specific files
+   .DS_Store
+   Thumbs.db
+```
+Remove SQLite:Now that PostgreSQL is running, delete the unnecessary db.sqlite3.
+```
+rm db.sqlite3
+```
+Delete cache.
+```
+   PS C:\projects\django-docker-project>
+   git rm -r --cached db.sqlite3
+```
+**[5]-C3-2 In addition to source code, configuration files are also pushed to GitHub**
+
+However, for security reasons, secret keys, database passwords, etc. should be stored in environment variables and excluded from being pushed.
+
+Modify settings.py
+```
+Python
+   (--- omitted ---)
+   # SECURITY WARNING: keep the secret key used in production secret!
+   SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
+
+   # SECURITY WARNING: don't run with debug turned on in production!
+   DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+
+   ALLOWED_HOSTS = ['michealfamily.com',
+      'www.michealfamily.com',
+      '52.69.81.143',
+      '127.0.0.1',
+      'localhost',
+      'web', # Dockerコンテナ名でのアクセスを許可
+      ]
+      #host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
+      #]
+      CSRF_TRUSTED_ORIGINS = [
+         origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
+      ]
+   (--- omitted ---)
+      DATABASES = {
+         'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'django_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'django_user'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'HM31764713DB'),
+            # Docker環境なら 'db'、それ以外なら '127.0.0.1' を使う設定
+            #'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+            'HOST': os.environ.get('DATABASE_HOST', 'db'),
+            'PORT': os.environ.get('DATABASE_PORT', '5432'),
+         }
+      }
+```
+**[5]-C3-3 Create an .env file and update it to docker-compose.yml**
+
+Create a .env file for Gemini as an example
+```
+.env
+   # Django基本設定
+   DJANGO_SECRET_KEY='HM31764713DB'
+   DJANGO_DEBUG=False
+   DJANGO_ALLOWED_HOSTS=michealfamily.com,www.michealfamily.com,52.69.81.143,web
+
+   # CSRF設定
+   DJANGO_CSRF_TRUSTED_ORIGINS=https://michealfamily.com,https://www.michealfamily.com
+
+   # データベース接続情報
+   DATABASE_HOST=db
+   DATABASE_PORT=5432
+   POSTGRES_DB=django_db
+   POSTGRES_USER=django_user
+   POSTGRES_PASSWORD=HM31764713DB
+```
+```
+docker-compose.yml
+   (--- omitted ---)
+   web:
+    build: .
+    env_file:         # --- Add these two lines
+      - .env          # ---
+    command:
+    (--- omitted ---)
+```
+**[5]-C3-4 Rebuild and start the Docker container**
+
+Now that Docker is running, modify the Dockerfile from development to production (Gunicorn).
+See the last line in [5]-C1-1.
+```
+Dockerfile
+   (--- omitted ---)
+   # 7.Start Gunicorn.
+   CMD ["gunicorn", "--bind", "0.0.0.0:8000", "my_django_project.wsgi:application"]
+```
+Attention！
+```
+Make sure gunicorn is included in requirements.txt.
+Start Docker Desktop and check that the green "Engine running" appears in the lower left.
+```
+Restart the Docker container.
+```
+Bash
+   PS C:\projects\django-docker-project> docker-compose down
+   ...
+   PS C:\projects\django-docker-project> docker-compose up -d --build
+      time="2026-03-04T01:12:19+09:00" ...
+      ...
+      #14 DONE 0.0s
+      [+] up 2/2
+      ✔ Image django-docker-project-web       Built                                                                                       3.3s
+      ✔ Container django-docker-project-web-1 Recreated                                                                                   0.2s
+```
+#### **[5]-C3-5 Push the changes to GitHub**
+Add all changed, deleted, and new files to the staging area and commit. → Push to GitHub.
+```
+Bash
+   PS C:\projects\django-docker-project> git add .
+   PS C:\projects\django-docker-project> git commit -m "Complete Docker setup with .env support and CSRF fix"
+      [main e52e203] Complete Docker setup with .env support and CSRF fix
+      5 files changed, 20 insertions(+), 15 deletions(-)
+      delete mode 100644 db.sqlite3
+   PS C:\projects\django-docker-project> git push origin main
+      Enumerating objects: 15, done.
+      Counting objects: 100% (15/15), done.
+      Delta compression using up to 12 threads
+      Compressing objects: 100% (9/9), done.
+      Writing objects: 100% (9/9), 1.19 KiB | 1.19 MiB/s, done.
+      Total 9 (delta 7), reused 0 (delta 0), pack-reused 0 (from 0)
+      remote: Resolving deltas: 100% (7/7), completed with 6 local objects.
+      To https://github.com/Honda-Manabu/my-django-app.git
+         5c972a5..d61d1a3  main -> main
+```
+### **[6] Staging server environment generation, operation check, publication,and operational evaluation**
+### **[6]-C Staging server environment generation**
+#### **[6]-C1 Creating a New Instance in Lightsail**
+Log in to AWS and select Lightsail from the menu. Create a new instance for staging.
+Here, I made two mistakes.
+```
+The correct procedure is
+   Click the orange "Create Instance" button
+   in the upper right corner of an existing instance.
+   SSH Key: Display and select the default SSH key options.
+```
+Since I created it from a snapshot of an existing instance and didn't know how to use the default SSH key, I had to reconfigure PuTTY and FileZilla, which I could use as-is. Since the internal .git settings were still in the state used by the old instance, I had to delete the created directory in order to perform a GitHub clone.
+
+Initializing a New Instance
+```
+   Assigning a Static IP and Domain
+   SSL Certificate: Running bncert-tool
+```
+For information on automatic SSL certificate renewal, please refer to the latter half of Note(15).
+```
+    (Replace the current line)
+        30 6 1 * * /opt/bitnami/letsencrypt/renew-certificate.sh > /opt/bitnami/letsencrypt/renewal.log 2>&1 >
+bitnami@ip-172-26-2-244:~$ sudo /opt/bitnami/letsencrypt/renew-certificate.sh
+NAME:
+   lego - Let's Encrypt client written in Go
+USAGE:
+   lego [global options] command [command options]
+VERSION:
+   4.15.0
+．．．
+print the version
+/opt/bitnami/letsencrypt/renew-certificate.sh: 7: --path: not found
+https://blog-michaeljp.net/ Display OK
+```
+
+#### **[6]-C2-1 Clone from GitHub to the Staging Server**
+See below for the procedure and contents:
+
+   [4]-A2-2 Generating SSH keys
+
+Creating directories and setting permissions
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ sudo mkdir -p /opt/bitnami/projects
+   bitnami@ip-172-26-2-244:~$ sudo chown $USER:$USER /opt/bitnami/projects
+```
+   [4]-A2-3 Cloning GitHub
+#### **[6]-C2-1 Creating the .env file that is not created during cloning**
+Final form of the .env file: See [5]-C3-3
+```
+Changes: ① Copy and paste the entire pemkey display
+         ② Domain name for DJANGO_ALLOWED_HOSTS
+            and CSRF settings
+```
+#### **[6]-C2-2 Create the image with the docker build command**
+##### **References: Note (22)** Without using docker-compose
+Perform docker build directly on the "host network"
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$
+   sudo docker build --network=host -t my-django-app-web .
+
+   [+] Building 18.9s (12/12) FINISHED
+   (The rest is omitted.)
+   (The DNS settings inside Docker were a bottleneck, causing repeated errors that took over 1000 seconds, but it finished in less than 20 seconds.)
+```
+#### **[6]-C2-3 Starting the application, migration, and checking browser access**
+Container startup
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose up -d
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+   ...
+   ✔ Container my-django-app-web-1      Started                               0.9s
+```
+Database reflection
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py migrate
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   Operations to perform:
+   ...
+   Applying sessions.0001_initial... OK
+```
+Static file aggregation
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ docker compose exec web python manage.py collectstatic --noinput
+
+   WARN[0000] /opt/bitnami/projects/my-django-app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+   125 static files copied to '/app/staticfiles'.
+```
+Final verification: Successful browser access
+```
+   http://blog-michaeljp.net:8001
+
+   http://blog-michaeljp.net:8001/admin
+```
+#### **[6]-C2-4 Create an administrator account**
+[5]-C2-3 See reference, creation is OK with the same username and password.
+```
+Bash
+   docker compose exec web python manage.py createsuperuser
+```
+#### **[6]-C3 Preparing for Automated System Development Environment Deployment**
+This final project is finally approaching its conclusion. Our conversations with the generating AI, driven by the desire for environmental convenience, have been fraught with unexpected procedures and repeated retries. Before embarking on the final steps towards even better environmental management, it's wise to clear out the folders and files that have become unnecessary due to the implementation of the latest, more advanced procedures—the "junk"—that we've used up to this point to master the existing procedures.
+#### **[6]-C3-1 Starting from a fully synchronized state of GitHub repository, production server, and staging server**
+These are the steps we will follow.As a prerequisite, both the production and staging servers have snapshots for the past week. (AWS settings)
+```
+   1)Currently, the local C:\projects\django-docker-project and the staging server are synchronized. The AI ​​is now assisting in finding unnecessary folders and files on the staging server.
+   2)Manual deletion of unnecessary folders and files outside of Git management on the staging server
+   3)Staging server Push, GitPull
+   4)Clear production server directory and Gitclone
+   5)Manual deletion of unnecessary folders and files outside of Git management on the production server
+```
+#### **[6]-C3-2　Delete virtual environments, caches, and logs in bulk**
+```
+Bash
+   bitnami@ip-172-26-2-244:~$ rm -rf venv/ .venv/ staticfiles/ *.log db.sqlite3
+
+   bitnami@ip-172-26-2-244:~$ find . -name "__pycache__" -type d -exec rm -rf {} +
+      find: ‘./.lego’: Permission denied
+```
+#### **[6]-C3-3 Manual deletion on the staging server**
+```
+Files that were backed up before the fix and whose contents are now outdated:
+          *.back.*
+Remnants: /opt/bitnami/projects/my-django-app/my_django_project/conf/bitnami
+          /opt/bitnami/projects/my-django-app/myapp
+```
+#### **[6]-C3-4 Staging, Commit, Push, Pull**
+```
+Bash
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git add -A
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config --global user.email "honda-m103742@coast.ocn.ne.jp"
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config --global user.name "Honda-Manabu"
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git commit -m "Cleanup: Remove legacy files and system-side debris"
+      [main 3d5f9ef] Cleanup: Remove legacy files and system-side debris
+      13 files changed, 13 insertions(+), 173 deletions(-)
+      ...
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git config pull.rebase false
+   bitnami@ip-172-26-2-244:/opt/bitnami/projects/my-django-app$ git push origin main
+      Enumerating objects: 18, done.
+      ...
+         ae344c5..0333f71  main -> main
+```
