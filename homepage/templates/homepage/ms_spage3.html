@@ -1,0 +1,100 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}私が読んだ本 - My homepage{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <p class="medium-text" style="border: 2px solid Violet; background-color:Cornsilk; margin-top: 20px; padding: 10px;">
+            私たちの世代の教養人には必ず「座右の書」がある...（中略）...行為自体の正当性とでもいえばよいのか、１００％無意味なこととは考えない。
+        </p>
+    </div>
+    <div class="col-md-12">
+        <p class="medium-text" style="border: 2px solid Violet; background-color:Gold; margin-top: 20px; padding: 10px;">
+            Every educated person of our generation has a "zayuunosho"...(omitted)...Still, I don't think it is 100% meaningless.
+        </p>
+    </div>
+    <div class="col-md-12">
+        <h2>私が読んだ本</h2>
+    </div>
+    <div class="col-md-12">
+        <p>言葉や時代の違いを超えて読めるのは、いろんな方々のお世話になって居ます...</p>
+        <p>感謝の気持ちが、また誰かに届きますように．．．</p>
+    </div>
+    <div class="col-md-6">
+        <img alt="photo1" src="{% static 'homepage/images/愛読書.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <img alt="photo2" src="{% static 'homepage/images/GRIT.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-info mt-2">Author Info</button>
+        <div id="author1" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+            <p id="auth1" class="font-weight-bold"></p>
+            <p id="hist1"></p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <img alt="photo3" src="{% static 'homepage/images/lisa-randall.jpg' %}" class="img-fluid" style="margin-top: 20px; margin-bottom: 20px;">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-info mt-2">Author Info</button>
+        <div id="author2" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+            <p id="auth2" class="font-weight-bold"></p>
+            <p id="hist2"></p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <img alt="photo4" src="{% static 'homepage/images/リチャード.jpg' %}" class="img-fluid" style="margin-top: 20px; margin-bottom: 20px;">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-info mt-2">Author Info</button>
+        <div id="author3" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+            <p id="auth3" class="font-weight-bold"></p>
+            <p id="hist3"></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 著者データの定義
+    const authors = {
+        angy: {
+            name: "Angela Duckworth, Ph.D. of Psychology",
+            history: "A leading researcher in the field of \"grit.\" In 2013, she received the MacArthur Genius Award. After graduating from Harvard University, Oxford Graduate School, and working as a mathematics teacher at a public middle school, she obtained her doctorate from the University of Pennsylvania and is now a professor there."
+        },
+        lisa: {
+            name: "Lisa Randall, Ph.D. of Theoretical Physicist",
+            history: "As a professor of physics at Harvard University, she researches particle physics and cosmology. She holds tenured appointments at Princeton University, MIT, and Harvard. A member of the National Academy of Sciences, she is also talented in rock climbing and writing opera scripts."
+        },
+        rick: {
+            name: "Richard Dawkins, Professor University of Oxford",
+            history: "With this book, he caused a sensation in the biology community around the world. He was arguably the most famous biologist in the modern world until the arrival of Jared Diamond."
+        }
+    };
+
+    // DOMへの流し込み
+    document.getElementById("auth1").innerText = "Author: " + authors.angy.name;
+    document.getElementById("hist1").innerText = authors.angy.history;
+    document.getElementById("auth2").innerText = "Author: " + authors.lisa.name;
+    document.getElementById("hist2").innerText = authors.lisa.history;
+    document.getElementById("auth3").innerText = "Author: " + authors.rick.name;
+    document.getElementById("hist3").innerText = authors.rick.history;
+
+    // ボタンイベントの設定 (1-based index)
+    const buttons = document.querySelectorAll(".btn-info");
+    buttons.forEach((btn, index) => {
+        btn.addEventListener("click", function() {
+            const div = document.getElementById("author" + (index + 1));
+            if (div) {
+                div.style.display = (div.style.display === "none" || div.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

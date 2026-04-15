@@ -1,0 +1,35 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}日記エッセイ - My homepage{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <p class="medium-text" style="border: 2px solid Violet; background-color:Cornsilk; margin-top: 20px; padding: 10px;">
+            私はWebデザインを勉強しており、自分のブログページを立ち上げようとしています...（中略）...半分に短縮出来ていたでしょう。
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p class="medium-text" style="border: 2px solid Violet; background-color:Gold; margin-top: 20px; padding: 10px;">
+            I am studying web design and am trying to launch my own blog page...(omitted)...cut my self-study time in half.
+        </p>
+    </div>
+    <div class="col-md-12">
+        <h2>これが私が作成中だったブログページです</h2>
+        <p>For a limited time only, external links will also be displayed when you click on the drop-down menu, "アート・他".</p>
+
+        <div class="col-md-10">
+            <video controls muted class="w-100">
+                <source src="{% static 'homepage/images/VID_250303My_Site.mp4' %}" type="video/mp4">
+                お使いのブラウザは動画タグをサポートしていません。
+            </video>
+        </div>
+    </div>
+    <div class="col-12 mt-4">
+        <p>The brilliant students would probably be able to complete it in three months, but as I'm over 70 years old, 
+           it will probably take me a long time to the Final Project and graduation. And without the advent of generative AI, 
+           I may not have been able to move forward.</p>
+    </div>
+</div>
+{% endblock %}

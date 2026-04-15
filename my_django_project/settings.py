@@ -31,6 +31,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+#DEBUG = True
 
 ALLOWED_HOSTS = ['michealfamily.com',
     'www.michealfamily.com',
@@ -54,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'myapp',
+    'homepage',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,73 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}旅の思い出 - My homepage{% endblock %}
+
+{% block content %}
+<div class="row align-items-stretch">
+    <div class="col-md-12" style="margin-top: 20px;">
+        <h1>旅の思い出</h1>
+        <p class="large-text">新型コロナ直前２０１９年夏のヨーロッパ旅行</p>
+    </div>
+    <div class="col-md-8">
+        <div class="imgtag1">
+            <img alt="Ad-preparation" src="{% static 'homepage/images/事前準備.jpg' %}" class="img-fluid w-100 h-100" style="object-fit: cover; margin-right: 20px;">
+        </div>
+    </div>
+    <div class="col-md-4 d-flex flex-column justify-content-between">
+        <div class="imgtag2">
+            <img alt="photo1" src="{% static 'homepage/images/190730-1.jpg' %}" class="img-fluid w-100 h-50" style="object-fit: cover;">
+            <img alt="photo2" src="{% static 'homepage/images/190730-2amsterdam.jpg' %}" class="img-fluid w-100 h-50" style="object-fit: cover;">
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-around">
+        <div class="col-md-4">
+            <img alt="Ad-preparation" src="{% static 'homepage/images/日程表.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+        </div>
+        <div class="col-md-4">
+            <div>
+                <img alt="photo3" src="{% static 'homepage/images/190730-3Dresden.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+                <img alt="photo5" src="{% static 'homepage/images/190731-5Meissen.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+                <img alt="photo7" src="{% static 'homepage/images/190802-7The-Chocolate-Factory.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+                <img alt="photo9" src="{% static 'homepage/images/190806-9Gent-tkoetshuys-Hotel.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div>
+                <img alt="photo4" src="{% static 'homepage/images/190731-4Dresden.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+                <img alt="photo6" src="{% static 'homepage/images/190801-6London.jpg' %}" class="img-fluid" style="margin-top: 27px;">
+                <img alt="photo8" src="{% static 'homepage/images/190805-8Gent.jpg' %}" class="img-fluid" style="margin-top: 29px;">
+                <img alt="photo10" src="{% static 'homepage/images/190806-10Paris.jpg' %}" class="img-fluid" style="margin-top: 70px;">
+            </div>
+        </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+            <p class="large-text" style="margin-top: 40px;">新型コロナ真最中の２０２０年夏北陸・岐阜・熊野の滝巡り旅</p>
+    </div>
+</div>
+
+<div class="row justify-content-around">
+    <div class="col-md-4">
+        <img alt="photo11" src="{% static 'homepage/images/200810-11称名滝.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-4">
+        <img alt="photo12" src="{% static 'homepage/images/200811-12上高地.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-4">
+        <img alt="photo13" src="{% static 'homepage/images/200814-13五色村布引滝.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-4">
+        <img alt="photo14" src="{% static 'homepage/images/200817-14那智一の滝.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-4">
+        <img alt="photo15" src="{% static 'homepage/images/200819-15熊野川.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+    <div class="col-md-4">
+        <img alt="photo16" src="{% static 'homepage/images/200820-16高野山清浄心院.jpg' %}" class="img-fluid" style="margin-top: 20px;">
+    </div>
+</div>
+{% endblock %}

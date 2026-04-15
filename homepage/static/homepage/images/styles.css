@@ -1,0 +1,120 @@
+/*
+Theme Name: Michael's Site
+Theme URI: https://laughing-guacamole-jwr7qr6wg673r5v-8080.app.github.dev/index.html
+Author: Honda Manabu
+Author URI: https://laughing-guacamole-jwr7qr6wg673r5v-8080.app.github.dev/index.html
+Description: CS50x homepage of my hobby or activities or interests
+Version: 1.1
+Text Domain: michaelssite
+*/
+/* Comment goes here */
+header {
+  background-color: #000000;
+  padding: 30px;
+  margin-left: 5cm;
+}
+
+nav {
+  background-color: #F5F5DC;
+  padding: 20px;
+  text-align: center;
+}
+
+body {
+  background-color: #7FFFD4;
+}
+
+/*
+section {
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+*/
+.container-xxl {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0px 80px 0px 80px;
+}
+
+/* Errors in the "Markup Validation Service", I changed it to the recommended writing style,
+(https://www.w3schools.com/css/css_selectors.asp)but it was out of style, so I changed it back. */
+article {
+  background-color: #FF00FF;
+  padding: 20px;
+  margin-top: 20px;
+
+  h5 {
+    color: green;
+  }
+
+  h3 {
+    color: #0000FF
+    border-style: 4px solid DodgerBlue;
+    background-color: Orange;
+  }
+}
+
+aside {
+  background-color: #A52A2A;
+  padding: 20px;
+  margin-top: 20px;
+
+  h4 {
+    color: white;
+  }
+}
+
+div.imgtag1 {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 均等配置 */
+}
+
+div.imgtag1 img,
+div.imgtag2 img {
+    height: 100%;
+    object-fit: cover; /* 画像の比率を保ったままトリミング */
+}
+
+footer {
+  background-color: #228B22;
+  padding: 30px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+p {
+    font-family: verdana;
+    font-size: 20px;
+}
+
+.large-text {
+    font-size: 2.0em;
+}
+.medium-text {
+    font-size: 1.5em;
+}
+
+video {
+  width: 100%;
+  height: auto;
+}
+
+.btn.active {
+  font-weight: bold;
+  animation: blinkText 1s infinite alternate;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes blinkText {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+

@@ -1,0 +1,48 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}ホーム - ウェブページの構成{% endblock %}
+
+{% block content %}
+<div class="row">
+    <article class="col-md-8">
+      <h2>ウェブページの構成</h2>
+      <h5>　　ナビのリンクボタンを選んでください</h5>
+      <div class="d-flex flex-column justify-content-between">
+        <div>
+          <h2>　</h2>
+          <h3>旅の思い出　　　　Travel Memories</h3>
+          <h4>新型コロナ直前の２０１９年ヨーロッパ旅行と真っ最中の２０２０年滝を巡るドライブ旅行の思い出と写真を掲載しています。</h4></div>
+        <div>
+          <h2>　</h2>
+          <h3>多肉植物と陶芸　　Succulents and pottery</h3>
+          <h4>リタイアした時に芸術に目覚め、始めた陶芸ですが、今では多肉植物たちの植木鉢を作るために続けています。
+              なかなか上手にならないので、何百万年も掛かってできた貴重な粘土を可塑性をなくす形で消費していることには、多少罪悪感が伴います。</h4></div>
+        <div>
+          <h2>　</h2>
+          <h3>私が読んだ本　　　Books I've read</h3>
+          <h4>言葉や時代の違いを超えて読むことができるには、学者・歴史家、作者・翻訳家のお世話になって居ます。
+              そのことに感謝し、誰かがまた、その学ぶ契機になれば幸いです。</h4></div>
+        <div>
+          <h2>　</h2>
+          <h3>日記エッセイ　　 　Diary Essay</h3>
+          <h4>私はWebデザインを勉強しており、ハーバード大学のオンライン講座情報処理入門の修了証を手に入れたら、
+              自分のブログページを立ち上げたいと考えています。</h4></div>
+      </div>
+    </article>
+    <aside class="col-md-4">
+        <h3>In the future I will create category posts here and links.</h3>
+        <h4>: 政治経済</h4>
+        <h4>: 科学・テクノロジー</h4>
+        <h4>: 食・世界の風習</h4>
+        <h4>: 健康・運動・睡眠</h4>
+        <h4>: アート・趣味・その他</h4>
+        <h4>ーーーーーーーーーーーーーー</h4>
+        <h3>In the future I will create Archive Calendar here and links.</h3>
+        <div>
+            <img src="{% static 'homepage/images/カレンダー250201.jpg' %}" alt="カレンダー" class="img-fluid">
+        </div>
+    </aside>
+</div>
+{% endblock %}
+

@@ -1,0 +1,32 @@
+<header id="header" class="row">
+    <nav class="navbar navbar-expand-lg bg-light">
+      <div class="container-fluid">
+        <h2>My Site</h2>
+        <button class="navbar-toggler" type="button" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <div class="d-flex flex-wrap gap-2">
+                <a id="nav-spage0" class="btn btn-primary m-1" href="{% url 'homepage:index' %}">ホーム</a>
+                <a id="nav-spage1" class="btn btn-success m-1" href="{% url 'homepage:spage' 1 %}">旅の思い出</a>
+                <a id="nav-spage2" class="btn btn-warning m-1" href="{% url 'homepage:spage' 2 %}">多肉植物と陶芸</a>
+                <a id="nav-spage3" class="btn btn-danger m-1" href="{% url 'homepage:spage' 3 %}">私が読んだ本</a>
+                <a id="nav-spage4" class="btn btn-info m-1" href="{% url 'homepage:spage' 4 %}">日記エッセイ</a>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle m-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        外部リンク
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="https://michaeljp-digital-diary.blog.jp/archives/43975128.html" target="_blank">政治経済</a></li>
+                        <li><a class="dropdown-item" href="http://blog.livedoor.jp/michaeljp-arigatou/archives/46394345.html" target="_blank">科学・テクノロジー</a></li>
+                        <li><a class="dropdown-item" href="http://blog.livedoor.jp/michaeljp-arigatou/archives/14893825.html" target="_blank">食・世界の風習</a></li>
+                        <li><a class="dropdown-item" href="http://blog.livedoor.jp/michaeljp-arigatou/archives/31692421.html" target="_blank">健康・運動・睡眠</a></li>
+                        <li><a class="dropdown-item" href="https://blog-michaeljp.net/" target="_blank">アート・趣味・その他</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+    </nav>
+</header>
