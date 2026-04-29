@@ -29,7 +29,7 @@
         <img alt="photo2" src="{% static 'homepage/images/GRIT.jpg' %}" class="img-fluid" style="margin-top: 20px;">
     </div>
     <div class="col-md-3">
-        <button class="btn btn-info mt-2">Author Info</button>
+        <button class="btn btn-info mt-2" data-target="author1">Author Info</button>
         <div id="author1" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
             <p id="auth1" class="font-weight-bold"></p>
             <p id="hist1"></p>
@@ -39,7 +39,7 @@
         <img alt="photo3" src="{% static 'homepage/images/lisa-randall.jpg' %}" class="img-fluid" style="margin-top: 20px; margin-bottom: 20px;">
     </div>
     <div class="col-md-3">
-        <button class="btn btn-info mt-2">Author Info</button>
+        <button class="btn btn-info mt-2" data-target="author2">Author Info</button>
         <div id="author2" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
             <p id="auth2" class="font-weight-bold"></p>
             <p id="hist2"></p>
@@ -49,7 +49,7 @@
         <img alt="photo4" src="{% static 'homepage/images/リチャード.jpg' %}" class="img-fluid" style="margin-top: 20px; margin-bottom: 20px;">
     </div>
     <div class="col-md-3">
-        <button class="btn btn-info mt-2">Author Info</button>
+        <button class="btn btn-info mt-2" data-target="author3">Author Info</button>
         <div id="author3" class="author-info" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
             <p id="auth3" class="font-weight-bold"></p>
             <p id="hist3"></p>
@@ -87,11 +87,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // ボタンイベントの設定 (1-based index)
     const buttons = document.querySelectorAll(".btn-info");
-    buttons.forEach((btn, index) => {
+    buttons.forEach((btn) => {
         btn.addEventListener("click", function() {
-            const div = document.getElementById("author" + (index + 1));
-            if (div) {
-                div.style.display = (div.style.display === "none" || div.style.display === "") ? "block" : "none";
+            const targetId = this.getAttribute("data-target");
+
+            if (targetId) {
+                const div = document.getElementById(targetId);
+                if (div) {
+                    // 表示と非表示を切り替える
+                    const isHidden = div.style.display === "none" || div.style.display === "";
+                    div.style.display = isHidden ? "block" : "none";
+                }
+            } else {
+                // もし data-target が設定されていないボタンが押された場合の警告（デバッグ用）
+                console.warn("このボタンには data-target が設定されていません。");
             }
         });
     });
