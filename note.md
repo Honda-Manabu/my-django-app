@@ -289,3 +289,6 @@ Bash
 ```
 If you start Django (my-django-app) with Docker as is, a port conflict will occur. Therefore, the AI ​​instructs me to stop the Bitnami service (sudo /opt/bitnami/ctlscript.sh stop), stop and restart the Docker container.
 This doesn't work no matter how many times I correct the .env and Docker settings.Nearly 20,000 characters of wasted communication occurred over several days. Ultimately, the correct solution was to run docker build directly on the "host network" without going through docker-compose.
+### Note (23):
+#### Directory duplication
+Directory duplication is standard Django behavior. This doesn't suit my preference, so I probably should have used a different name when creating a new app (a directory with the same name is automatically created), but since I've already done it, I'll proceed as is.
