@@ -1469,3 +1469,8 @@ Python
       BASE_DIR / "homepage" / "static",
    ]
 ```
+The AI's suggestion to modify .github/workflows/deploy-docs.yml is invalid.
+The AI ​​suggestion to modify .github/workflows/deploy-docs.yml is invalid. The name of the Environment secrets in GitHub Actions is SSH_PRIVATE_KEY, so delete it. Re-register both Staging and Production with BITNAMI.
+```
+
+```
