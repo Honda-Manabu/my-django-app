@@ -1,0 +1,103 @@
+{% extends "homepage/base.html" %}
+
+{% load static %}
+
+{% block content %}
+<style>
+    /* 全体のコンテナ設定 */
+    #tastcho-content {
+        padding: 20px;
+        max-width: 1200px; /* 500px×4枚だと大きすぎるため、画面幅に合わせつつ調整 */
+        margin: 0 auto;
+    }
+
+    /* 1列4枚のグリッドレイアウト */
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 1列に4つの等間隔スペース */
+        gap: 20px; /* 画像間の隙間 */
+        margin-top: 20px;
+    }
+
+    /* 画像のサイズ指定 (500x600) */
+    .image-item img {
+        width: 100%;       /* グリッドの幅に合わせる（最大500pxを想定） */
+        max-width: 500px;  /* 指定の幅 */
+        height: 600px;     /* 指定の高さ */
+        object-fit: cover; /* 比率が違う画像も切り取って綺麗に収める */
+        border-radius: 8px;
+        display: block;
+    }
+
+    /* Facebook外部リンクセクションの装飾 */
+    .external-link-section {
+        margin: 40px 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .fb-link-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #1877F2; /* Facebookカラー */
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .fb-link-button:hover {
+        background-color: #166fe5;
+        color: white;
+    }
+
+    /* レスポンシブ対応（画面が狭いときは1列の枚数を減らす） */
+    @media (max-width: 1024px) {
+        .image-gallery { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+        .image-gallery { grid-template-columns: 1fr; }
+    }
+</style>
+
+<main>
+    <div id="tastcho-content">
+        <h2 id="tastcho-title">お気に入り / Favorites</h2>
+        
+        <div class="image-gallery">
+            <div class="image-item">
+                <img src="{% static 'homepage/images/一只小碗碗.jpg' %}" alt="一只小碗碗">
+            </div>
+            <div class="image-item">
+                <img src="{% static 'homepage/images/一只小碗碗1.jpg' %}" alt="一只小碗碗1">
+            </div>
+            </div>
+
+        <div class="external-link-section">
+            <p style="margin-bottom: 10px;">関連動画をチェックする</p>
+            <a href="https://www.facebook.com/share/r/1H6rc6iCKJ/" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="fb-link-button">
+                動画はこちら（Facebookへ移動します）
+            </a>
+        </div>
+    </div>
+</main>
+
+<script>
+    function switchLanguage(lang) {
+        const titleElement = document.getElementById('tastcho-title');
+
+        if (lang === 'ja') {
+            titleElement.innerText = 'お気に入り';
+        } else if (lang === 'en') {
+            titleElement.innerText = 'Favorites';
+        }
+    }
+</script>
+{% endblock %}

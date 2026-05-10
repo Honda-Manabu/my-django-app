@@ -1472,5 +1472,9 @@ Python
 The AI's suggestion to modify .github/workflows/deploy-docs.yml is invalid.
 The AI ​​suggestion to modify .github/workflows/deploy-docs.yml is invalid. The name of the Environment secrets in GitHub Actions is SSH_PRIVATE_KEY, so delete it. Re-register both Staging and Production with BITNAMI.
 ```
-
+Environment variables
+Reference
+ https://github.com/Honda-Manabu/my-django-app/settings/environments/13851764540/edit  
 ```
+### **[7]-E Automation of Deployment and Presentation of the Final Development and Operational Environment for Local, Stajing, and Production**
+#### **[7]-E-1 **

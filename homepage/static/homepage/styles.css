@@ -20,6 +20,18 @@ nav {
   text-align: center;
 }
 
+/* ナビゲーションバーのリンク色を強制的に上書き */
+/*.navbar-light .navbar-nav .nav-link.text-success {
+    color: #28a745 !important;
+    font-weight: 700 !important;
+}
+
+/* 他のメニューが選択された際、About me (text-primary) を黒くしたい場合 */
+/*.navbar-light .navbar-nav .nav-link.text-dark-custom {
+    color: #343a40 !important;
+    font-weight: normal !important;
+}*/
+
 body {
   background-color: #7FFFD4;
 }
@@ -118,3 +130,13 @@ video {
   100% { opacity: 1; }
 }
 
+/* english cursive */
+.script-font {
+    font-family: 'Niconne', fantasy;
+    font-size: 2.5rem;
+}
+
+/* 日本語　筆記体 */
+.standard-font {
+    font-family: Arial, Helvetica, sans-serif;
+}

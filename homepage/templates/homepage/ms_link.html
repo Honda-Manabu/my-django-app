@@ -1,0 +1,64 @@
+{% extends "homepage/base.html" %}
+
+{% load static %}
+
+{% block content %}
+<main>
+    <div id="link-content">
+        <h2 id="link-title" class="mb-4"></h2>
+        
+        <div class="link-group" style="margin-bottom: 30px;">
+            <!-- 1つ目のLink -->
+            <div class="link-pair" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <a href="https://github.com/pluralitybook/plurality" target="_blank" class="btn" 
+                   style="width: 110px; padding: 10px 5px; background-color: #333; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; font-size: 0.85rem; flex-shrink: 0;">
+                   GitHub
+                </a>
+                <p style="margin: 0; font-size: 0.95rem; color: #444;">
+                    <strong id="plurality-name1"></strong>
+                </p>
+            </div>
+            <!-- 2つ目のLink -->
+            <div class="link-pair" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <a href="https://plurality.net/" target="_blank" class="btn" 
+                   style="width: 110px; padding: 10px 5px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; font-size: 0.85rem; flex-shrink: 0;">
+                   plurality.net
+                </a>
+                <p style="margin: 0; font-size: 0.95rem; color: #444;">
+                    <strong id="plurality-name2"></strong>
+                </p> 
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    const linkData = {
+        'ja': {
+            'title': 'リンク',
+            'name1': 'プルーラリティ',
+            'name2': '協調技術と民主主義の未来：'
+        },
+        'en': {
+            'title': 'Links',
+            'name1': 'Pluralitybook',
+            'name2': 'The Future of Collaborative Technology and Democracy:'
+        }
+    };
+
+    function switchLanguage(lang) {
+        const data = linkData[lang];
+        if (!data) return;
+
+        document.getElementById('link-title').innerText = data.title;
+        document.getElementById('plurality-name1').innerText = data.name1;
+        document.getElementById('plurality-name2').innerText = data.name2;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedLang = localStorage.getItem('selectedLang') || 'en';
+        switchLanguage(savedLang);
+    });
+</script>
+{% endblock %}

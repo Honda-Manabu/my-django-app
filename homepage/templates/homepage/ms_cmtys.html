@@ -1,0 +1,66 @@
+{% extends "homepage/base.html" %}
+
+{% load static %}
+
+{% block content %}
+<main>
+    <div id="main-message-area" class="mb-2" style="text-align: left;">
+        <span id="main-message" style="font-size: 0.9rem; color: #666;"></span>
+    </div>
+    <div id="main-visual">
+        <!-- 画像のsrcはJSで制御するため、空またはプレースホルダーにします -->
+        <img id="top-image" src="" alt="Top Image" style="max-width:100%; height: auto;">
+    </div>
+    <div id="cmtys-content" class="mt-4">
+        <!-- 言語に応じてJSがここにテキストとボタンをを挿入します -->
+        <p id="cmtys-text" style="white-space: pre-wrap;"></p>
+        <div id="contact-link-area" class="mt-4"></div>
+    </div>
+</main>
+
+<script>
+    const cmtysData = {
+        'ja': {
+            'msg': '（ヘッダーメニューをお選びください。）',
+            'img': "{% static 'homepage/images/IMG_日本語.jpg' %}",
+            'text': `地球上から全ての紛争・係争地域が消滅し、ソマリアが地上の楽園になるのを見たとき、私は初めて満足するだろう。国家というものをなくしてでも、今すべての国々の軍事費に使われているお金の使い道を、１８０度転換し、人々の働き口の確保や福祉に振り向ければ、地上から貧婚は消滅する。
+                    　出来もしないことより、自分や家族の生活が大切だと考える人、一度きりしかない人生は自己実現や学究や挑戦に前向きに取り組むことを優先する人、他人の不幸など知ったことではない、他人の痛みを知覚できない差別主義者迄、実現を妨げる要因は単純に取り除ける障害ではない。
+                    　それでも、スタートラインが違う不公平だけはなくそう。強くそう望む人々のコミュニティを立ち上げ、世界をもっとまともで暮らしやすい場所にしよう。
+                    このページにはまだ何もありません。政治経済コミュニティ、メンバーページ、オンラインサロンなど、志を同じくして集まり、社会を変えていく方法を学び実践する場所にします。`,
+            'linkText': 'コンタクトページへ'
+        },
+        'en': {
+            'msg': '（Please select from the header menu.）',
+            'img': "{% static 'homepage/images/IMG_English.jpg' %}",
+            'text': `I will only be satisfied when all conflict zones disappear from the face of the earth and Somalia becomes a paradise. Even if it means eliminating nation-states, if we completely reverse the use of the money currently spent on military expenditures in all countries and redirect it towards creating jobs and welfare, poverty will disappear from the earth.
+                    However, obstacles to achieving this are not simply removed: some prioritize their own and their family's lives over impossible goals; others prioritize self-realization, academic pursuits, and challenges in their one and only life; and still others are discriminatory, incapable of understanding the suffering of others.
+                    Nevertheless, let's eliminate the inequality of starting from different points. Let's create a community of people who strongly desire this and make the world a more decent and livable place.
+                    This page is currently empty. It will become a place where like-minded individuals can gather, learn, and practice ways to change society, including a political and economic community, member pages, and an online salon.`,
+            'linkText': 'Link to contact page'           
+        }    
+    };
+
+    /**     base.html の setLanguage() から呼び出される関数     */
+    function switchLanguage(lang) {
+        const data = cmtysData[lang];
+        if (!data) return;
+
+        // 各要素をIDで取得して内容を書き換え
+        const msgEl = document.getElementById('main-message');
+        const imgEl = document.getElementById('top-image');
+        const txtEl = document.getElementById('cmtys-text');
+        const btnArea = document.getElementById('contact-link-area');
+
+        if (msgEl) msgEl.innerText = data.msg;
+        if (imgEl) imgEl.src = data.img;
+        if (txtEl) txtEl.innerText = data.text;
+        if (btnArea) {
+            btnArea.innerHTML = `<a href="{% url 'homepage:ms_contact' %}" class="btn btn-outline-primary">${data.linkText}</a>`;
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedLang = localStorage.getItem('selectedLang') || 'en';
+        switchLanguage(savedLang);
+    });
+</script>
+{% endblock %}

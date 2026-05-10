@@ -1,0 +1,248 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* フォーム全体のコンテナ */
+    #contact-form-placeholder {
+        background-color: #f8adcc; /* ピンクの背景 */
+        padding: 40px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        color: #333;
+        font-family: Arial, sans-serif;
+    }
+
+    /* 左側のテキストエリア */
+    .contact-left {
+        width: 40%;
+    }
+
+    .contact-left h2 {
+        font-family: 'Cedarville Cursive', cursive; /* 筆記体 */
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+
+    /* 右側の入力エリア */
+    .contact-right {
+        width: 55%;
+    }
+
+    .contact-right input, 
+    .contact-right textarea {
+        width: 100%;
+        background-color: #3fa2e4; /* 青い入力欄 */
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .contact-right input::placeholder,
+    .contact-right textarea::placeholder {
+        color: #e0e0e0;
+    }
+
+    /* 送信ボタン */
+    .send-btn {
+        background-color: #3fa2e4;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 5px;
+        float: right;
+        cursor: pointer;
+    }
+
+    /* SNSアイコンのリスト（黒い点を消す） */
+    .contact-left ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .sns-icons {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .sns-icons li {
+        background-color: #000; /* 黒い背景 */
+        width: 32px;           /* サイズ */
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;    /* 角の取れた正方形 */
+        cursor: pointer;
+    }
+
+    .sns-icons i {
+        color: #f8adcc;        /* アイコンの色（背景のピンクをここに指定すると、抜けて見えます） */
+        font-size: 18px;
+}
+</style>
+<main>
+    <div id="contact-content">
+        <!-- イントロダクションテキスト -->
+        <p id="contact-text-p" style="white-space: pre-wrap;"></p>
+        
+        <div id="contact-form-placeholder">
+            <div id="contact-inner-layout" style="display: flex; width: 100%; justify-content: space-between; flex-wrap: wrap;">
+                <!-- 左側：連絡先情報 -->
+                <div class="contact-left standard-font" style="flex: 1; min-width: 300px;">
+                    <h2 id="contact-heading" class="script-font"></h2>
+                    <p id="contact-subheading" class="script-font"></p>
+                    <p style="font-size: 0.8rem;">Osaka, Japan</p>
+                    <p style="font-size: 0.8rem;">honda.m3742@icloud.com</p>
+                    <ul class="sns-icons" style="list-style: none; padding: 0; display: flex; gap: 10px;">
+                        <li><a href="https://www.facebook.com/profile.php?id=100080663016126&ref=aymt_homepage_panel#" target="_blank" style="color: inherit;"><i class="fa-brands fa-facebook-f"></i></a></li>
+                        <li><a href="https://x.com/search?q=hondamanabu1&src=typd" target="_blank" style="color: inherit;"><i class="fa-brands fa-x-twitter"></i></a></li>
+                        <li><a href="https://github.com/Honda-Manabu" target="_blank" style="color: inherit;"><i class="fa-brands fa-github"></i></a></li>
+                    </ul>
+                </div>
+
+                <!-- 右側：フォーム本体 -->
+                <div class="contact-right" style="flex: 1; min-width: 300px;">
+                    <form action="#" method="post">
+                        {% csrf_token %}
+                        <input type="text" name="name" id="field-name">
+                        <input type="email" name="email" id="field-email">
+                        <input type="text" name="subject" id="field-subject">
+                        <textarea name="message" id="field-message" rows="5"></textarea>
+                        <button type="submit" id="btn-send" class="send-btn"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="form-response-area" style="display: none; margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255,255,255,0.5);">
+                        <div id="submitted-data" style="margin-bottom: 10px; font-size: 0.9rem;"></div>
+                        <div id="response-status-msg" style="color: #d63384; font-weight: bold;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 id="achievements-title"></h3>
+        <p id="achievements-content"></p>
+    </div>
+</main>
+
+<script>
+    const contactData = {
+        'ja': {
+            'intro': `コミュニティのページに書いたことを行動に移し、コミュニティの活動を世界的なものにするための方法を検討します。
+オードリー・タンが提唱し、安野貴博がチーム未来を立ち上げた手法に詳しい方（AIエンジニア）を求めます。
+趣旨に賛同し連絡をいただき会員になっていただいた方々で話し合い、形を築いていくためにこの場所を提供します。`,
+            'heading': "会話しましょう。 クリックして情報を入力してください。",
+            'subheading': "本田 学 宛",
+            'placeholders': {
+                'name': "お名前 *",
+                'email': "メールアドレス *",
+                'subject': "件名",
+                'message': "メッセージ"
+            },
+            'sendBtn': "送信",
+            'successMsg': "メールが送信されました。返事をお待ちください。",
+            'achTitle': "事績",
+            'achContent': ""
+        },
+        'en': {
+            'intro': `We will put into action what we've written on the community page and explore ways to make the community's activities global.
+We are seeking someone (AI engineer) familiar with the methodology advocated by Audrey Tang and used by Takahiro Yasuno to establish Team Mirai.
+This space is provided for discussion and shaping among those who agree with the purpose, contact us, and become members.`,
+            'heading': "Let's Talk. Please click to enter your information.",
+            'subheading': "To Honda Manabu",
+            'placeholders': {
+                'name': "Your Name *",
+                'email': "Email Address *",
+                'subject': "Subject",
+                'message': "Message"
+            },
+            'sendBtn': "SEND",
+            'successMsg': "The email has been sent. Please wait for a reply.",
+            'achTitle': "Achievements",
+            'achContent': ""
+        }
+    };
+
+    let currentLang = 'en';
+
+    function switchLanguage(lang) {
+        const data = contactData[lang];
+        if (!data) return;
+
+        // テキスト要素の更新
+        document.getElementById('contact-text-p').innerText = data.intro;
+        document.getElementById('contact-heading').innerText = data.heading;
+        document.getElementById('contact-subheading').innerText = data.subheading;
+        document.getElementById('achievements-title').innerText = data.achTitle;
+        document.getElementById('achievements-content').innerText = data.achContent;
+
+        // フォームプレースホルダーとボタン
+        const nameField = document.getElementById('field-name');
+        const emailField = document.getElementById('field-email');
+        const subjectField = document.getElementById('field-subject');
+        const messageField = document.getElementById('field-message');
+        const sendBtn = document.getElementById('btn-send');
+
+        nameField.placeholder = data.placeholders.name;
+        emailField.placeholder = data.placeholders.email;
+        subjectField.placeholder = data.placeholders.subject;
+        messageField.placeholder = data.placeholders.message;
+        sendBtn.innerText = data.sendBtn;
+    }
+
+    // フォーム送信処理
+    document.getElementById('contact-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // ページリロードを防止
+
+        const data = contactData[currentLang];
+        const name = document.getElementById('field-name').value;
+        const email = document.getElementById('field-email').value;
+        const subject = document.getElementById('field-subject').value;
+        const message = document.getElementById('field-message').value;
+        // ブラウザ標準のバリデーションに加え、JSで簡易チェック
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            responseArea.innerText = currentLang === 'ja' ? "有効なメールアドレスを入力してください。" : "Please enter a valid email address.";
+            return;
+        }
+
+        // 入力内容の表示用HTML作成
+        const submittedDataHtml = `
+            <strong>${data.labels.name}:</strong> ${name}<br>
+            <strong>${data.labels.email}:</strong> ${email}<br>
+            <strong>${data.labels.subject}:</strong> ${subject}<br>
+            <strong>${data.labels.message}:</strong> ${message}
+        `;
+
+        // 結果エリアの表示
+        const responseArea = document.getElementById('form-response-area');
+        document.getElementById('submitted-data').innerHTML = submittedDataHtml;
+        document.getElementById('response-status-msg').innerText = data.successMsg;
+        
+
+        // In the future, data will be sent to the Django View using Ajax (Fetch API),
+
+        // and then sent to the email address from the Django side.
+
+        // Currently, the UI only displays the message.
+        
+        responseArea.style.display = 'block';
+        this.reset(); // フォームをクリア
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedLang = localStorage.getItem('selectedLang') || 'en';
+        switchLanguage(savedLang);
+    });
+</script>
+{% endblock %}

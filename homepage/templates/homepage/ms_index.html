@@ -1,0 +1,198 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Home - My Homepage{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* フロントページ専用：背景画像の設定 */
+    body {
+        background-image: url("{% static 'homepage/images/フロントページ背景.png' %}");
+        background-size: 1200px auto !important;
+        background-position: top center !important;
+        /*background-attachment: fixed;*/
+        background-repeat: no-repeat !important;
+        background-color: white;
+
+        /*max-width: 1200px; */
+        margin: 0 !important;
+
+        /*display: flex;
+        flex-direction: column;
+        min-height: 80vh; /* 画像の高さに応じて調整 600px
+        justify-content: space-between; */
+    }
+    /* コンテンツエリアの背景（文字を読みやすくする場合） */
+    main {
+        max-width: 1200px;
+        margin: 0 auto;
+        /*min-height: calc(1600px - 117px - 60px);*/
+        min-height: 100vh;
+        background-color: rgba(255, 255, 255, 0.6); 
+        padding: 20px;
+        box-sizing: border-box;
+        /*display: flex;*/
+        flex-direction: column;
+    }
+
+    #main-message {
+        display: block;
+        text-align: left;
+        font-size: 0.9rem;
+        margin-bottom: 20px; /* ロゴとの間隔 */
+        color: #333;
+        width: 100%;
+    }
+
+    /* ロゴ画像エリア（無垢な生活 / nijimasu.jpg） */
+   .reconstructed-logo {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 40px;
+        height: auto; /* 高さを内容に合わせる */
+    }
+
+    /* 「★ 無垢な生活 ★」の部分 */
+    .logo-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 5px;
+    }
+
+    .hitode-left {
+        width: 35px; /* 右よりほんの少し小さく */
+        height: auto;
+        align-self: flex-end; /* 下付き */
+        margin-bottom: 10px;
+    }
+
+    .hitode-right {
+        width: 40px;
+        height: auto;
+        align-self: flex-start; /* 上付き */
+        margin-top: 10px;
+    }
+
+    .logo-title {
+        font-family: 'Yuji Mai', serif; /* 毛筆体 */
+        font-size: 64px;
+        font-weight: normal;
+        color: #000;
+        line-height: 1.2;
+    }
+
+    /* 魚とラインの部分 */
+    .logo-middle-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .line {
+        flex-grow: 1;
+        height: 1px;
+        border-top: 1px dotted #000;
+    }
+
+    .fish-image {
+        width: 165px; /* nijimasu.jpgのサイズ */
+        height: auto;
+        margin: 0 10px;
+    }
+
+    /* 「by honda manabu」の部分 */
+    .logo-bottom-row {
+        margin-top: 10px;
+    }
+
+    .author-name {
+        font-family: 'Niconne', cursive; /* 筆記体 */
+        font-size: 48px;
+        color: #000;
+    }
+
+    /* メインビジュアル（楊穎） */
+    #main-visual {
+        text-align: center;
+        width: 100%;
+    }
+
+    #main-visual img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+
+    #main-visual p {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* スマホ対応 */
+    @media (max-width: 768px) {
+        .logo-title { font-size: 32px; }
+        .author-name { font-size: 32px; }
+        .fish-image { width: 120px; }
+        .star { font-size: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+    <div id="main-message">
+        <!-- 初期表示は(EN) -->
+    </div>
+    <div class="reconstructed-logo">
+        <!-- 上段：星とタイトル -->
+        <div class="logo-top-row">
+            <img src="{% static 'homepage/images/hitode.jpg' %}" alt="hitode" class="hitode-left">
+            <div class="logo-title">無垢な生活</div>
+            <img src="{% static 'homepage/images/hitode.jpg' %}" alt="hitode" class="hitode-right">
+        </div>
+
+        <!-- 中段：ラインと魚 -->
+        <div class="logo-middle-row">
+            <div class="line"></div>
+            <img src="{% static 'homepage/images/nijimasu.jpg' %}" alt="nijimasu" class="fish-image">
+            <div class="line"></div>
+        </div>
+
+        <!-- 下段：名前 -->
+        <div class="logo-bottom-row">
+            <div class="author-name">by honda manabu</div>
+        </div>
+    </div>
+    </div>
+    <div id="main-visual">
+        <p>(アジアの奇跡)</p> 
+        <img src="{% static 'homepage/images/アジアの奇跡 楊穎.jpg' %}" alt="Top Image" style="max-width:100%;">
+    </div>
+</main>
+
+<script>
+    const contentData = {
+        'en': '（Please select from the header menu.）',
+        'ja': '（ヘッダーメニューをお選びください。）'
+    };
+
+    // base.htmlから呼び出される関数
+    function switchLanguage(lang) {
+        const msgElement = document.getElementById('main-message');
+        if (msgElement) {
+            msgElement.innerText = contentData[lang];
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedLang = localStorage.getItem('selectedLang') || 'en';
+        switchLanguage(savedLang);
+    });
+</script>
+{% endblock %}
