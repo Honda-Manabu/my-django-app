@@ -9,7 +9,7 @@ Text Domain: michaelssite
 */
 /* Comment goes here */
 header {
-  background-color: #000000;
+  background-color: #228B22;
   padding: 30px;
   margin-left: 5cm;
 }
@@ -46,8 +46,11 @@ section {
 .container-xxl {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  margin: 0px 80px 0px 80px;
+  flex: 1; /* bodyの高さ（背景画像）に合わせて目一杯広がる */
+  margin: 0 auto;
+  padding: 0 30px; 
+  max-width: 1260px;
+  width: 100%;
 }
 
 /* Errors in the "Markup Validation Service", I changed it to the recommended writing style,
@@ -94,12 +97,14 @@ footer {
   background-color: #228B22;
   padding: 30px;
   text-align: center;
-  margin-top: 20px;
+  margin-top: auto;
 }
 
 p {
     font-family: verdana;
     font-size: 20px;
+    color: #ffffff;
+    margin: 0;
 }
 
 .large-text {

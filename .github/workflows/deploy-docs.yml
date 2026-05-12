@@ -6,8 +6,8 @@ on:
       - main
       - staging
     paths:
-      - 'README.md'
-      - 'note.md'
+      - '**'
+      
 
 jobs:
   deploy:
