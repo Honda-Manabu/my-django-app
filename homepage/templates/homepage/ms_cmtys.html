@@ -2,12 +2,25 @@
 
 {% load static %}
 
+{% block extra_head %}
+<style>
+    #cmtys-content {
+        background-color: rgba(0, 100, 0, 0.7) !important; 
+        padding: 30px;
+        border-radius: 8px;
+        margin: 20px 20px 20px 0; 
+        max-width: 1200px;
+        display: block;
+    }
+</style>
+{% endblock %}
+    
 {% block content %}
 <main>
-    <div id="main-message-area" class="mb-2" style="text-align: left;">
-        <span id="main-message" style="font-size: 0.9rem; color: #666;"></span>
+    <div id="main-message-area" class="mb-2" style="text-align: left; padding-left: 20px;">
+        <span id="main-message" style="font-size: 1.0rem; color: #666; font-weight: bold;"></span>
     </div>
-    <div id="main-visual">
+    <div id="main-visual" style="padding-left: 20px;">
         <!-- 画像のsrcはJSで制御するため、空またはプレースホルダーにします -->
         <img id="top-image" src="" alt="Top Image" style="max-width:100%; height: auto;">
     </div>

@@ -23,4 +23,13 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             cd ${{ secrets.REMOTE_PATH }}
+            # 2. 強制上書き対応が必要な場合 git pull と入れ替え
+            #git fetch origin ${{ github.ref_name }}
+            #git reset --hard origin/${{ github.ref_name }}
             git pull origin ${{ github.ref_name }}
+            sudo chown -R bitnami:bitnami .
+            pip install -r requirements.txt
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+            sudo /opt/bitnami/ctlscript.sh restart apache || true
+            

@@ -3,6 +3,22 @@
 
 {% block content %}
 <style>
+    #contact-content {
+        max-width: 1200px;
+        margin: 0 30px;
+        padding-bottom: 50px;
+    }
+    #contact-text-p {
+        background-color: rgba(0, 100, 0, 0.7) !important;
+        color: #ffffff !important;
+        padding: 40px 30px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        min-height: 150px;
+    }
+
     /* フォーム全体のコンテナ */
     #contact-form-placeholder {
         background-color: #f8adcc; /* ピンクの背景 */
@@ -86,7 +102,17 @@
     .sns-icons i {
         color: #f8adcc;        /* アイコンの色（背景のピンクをここに指定すると、抜けて見えます） */
         font-size: 18px;
-}
+    }
+
+    #achievements-title, 
+    #achievements-content {
+        margin-left: 60px !important;
+        margin-bottom: 30px;
+    }
+
+    #achievements-title {
+        font-weight: bold;
+    }
 </style>
 <main>
     <div id="contact-content">
@@ -130,7 +156,7 @@
         </div>
 
         <h3 id="achievements-title"></h3>
-        <p id="achievements-content"></p>
+        <p id="achievements-content"></p></p>
     </div>
 </main>
 

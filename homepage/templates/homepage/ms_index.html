@@ -8,157 +8,19 @@
     /* フロントページ専用：背景画像の設定 */
     body {
         background-image: url("{% static 'homepage/images/フロントページ背景.png' %}");
-        background-size: 1300px 1600px !important;
+        background-size: 1260px auto !important; 
         background-position: top center !important;
-        /*background-attachment: fixed;*/
-        background-repeat: no-repeat !important;
-        background-color: white;
-        margin: 0 !important;
-
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 1600px !important;
     }
 
-    .bottom-spacer {
-        flex: 1;
-    }
-    
-    /* コンテンツエリアの背景（文字を読みやすくする場合） */
-    main {
-        width: 100%;
-        min-height: auto;
-        /*min-height: calc(1600px - 117px - 60px);*/
-        background-color: transparent;
-        padding: 0;
+    .front-page-body {
+        width: 1260px !important;
+        margin: 0 auto !important;
         box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    #main-message {
-        display: block;
-        position: static;
-        font-size: 0.9rem;
-        color: #333;
-        margin: 10px 0 20px 20px;
-        align-self: center;
-    }
-
-    /* ロゴ画像エリア（無垢な生活 / nijimasu.jpg） */
-   .reconstructed-logo {
-        display: block;
-        width: fit-content;
-        margin: 0 auto 40px auto!important ;
-        text-align: center;
-        background-color: rgba(255, 255, 255, 0.6);
-        padding: 40px;
-        box-sizing: border-box;
-    }
-   .logo-content-wrapper {
-        display: block;
-        width: 600px;      
-        background-color: #ffffff;
-        padding: 20px;
-    } 
-
-    /* 「★ 無垢な生活 ★」の部分 */
-    .logo-top-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 5px;
-    }
-
-    .hitode-left {
-        width: 35px; /* 右よりほんの少し小さく */
-        height: auto;
-        align-self: flex-end; /* 下付き */
-        margin-bottom: 10px;
-    }
-
-    .hitode-right {
-        width: 40px;
-        height: auto;
-        align-self: flex-start; /* 上付き */
-        margin-top: 10px;
-    }
-
-    .logo-title {
-        font-family: 'Yuji Mai', serif; /* 毛筆体 */
-        font-size: 64px;
-        font-weight: normal;
-        color: #000;
-        line-height: 1.2;
-    }
-
-    /* 魚とラインの部分 */
-    .logo-middle-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .line {
-        flex-grow: 1;
-        height: 1px;
-        border-top: 1px dotted #000;
-    }
-
-    .fish-image {
-        width: 165px; /* nijimasu.jpgのサイズ */
-        height: auto;
-        margin: 0 10px;
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    /* 「by honda manabu」の部分 */
-    .logo-bottom-row {
-        margin-top: 10px;
-    }
-
-    .author-name {
-        font-family: 'Niconne', cursive; /* 筆記体 */
-        font-size: 48px;
-        color: #000;
-    }
-
-    /* メインビジュアル（楊穎） */
-    #main-visual {
-        text-align: left;
-        width: 100%;
-        margin-top: 20px;
-        padding-left: 20px;
-    }
-
-    #main-visual img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 4px;
-        display: block;
-        margin-left: 0;
-    }
-
-    #main-visual p {
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
-    /* スマホ対応 */
-    @media (max-width: 768px) {
-        .logo-title { font-size: 32px; }
-        .author-name { font-size: 32px; }
-        .fish-image { width: 120px; }
-        .star { font-size: 20px; }
     }
 </style>
 {% endblock %}
+
+{% block body_class %}front-page-body{% endblock %}
 
 {% block content %}
 <div style="position: relative;">
@@ -166,32 +28,78 @@
         <!-- 初期表示は(EN) -->
     </div>
     <div class="reconstructed-logo">
-        <!-- 上段：星とタイトル -->
         <div class="logo-content-wrapper"> 
             <div class="logo-top-row">
                 <img src="{% static 'homepage/images/hitode.jpg' %}" alt="hitode" class="hitode-left">
                 <div class="logo-title">無垢な生活</div>
                 <img src="{% static 'homepage/images/hitode.jpg' %}" alt="hitode" class="hitode-right">
             </div>
-            <!-- 中段：ラインと魚 -->
             <div class="logo-middle-row">
                 <div class="line"></div>
                 <img src="{% static 'homepage/images/nijimasu.jpg' %}" alt="nijimasu" class="fish-image">
                 <div class="line"></div>
             </div>
 
-            <!-- 下段：名前 -->
             <div class="logo-bottom-row">
-                <div class="author-name">by honda manabu</div>
+                <div class="author-name">Since 2026 by honda manabu</div>
             </div>
         </div>
 
         <div style="flex: 1;"></div>
     </div>
     
-    <div id="main-visual">
-        <p>(アジアの奇跡)</p> 
-        <img src="{% static 'homepage/images/アジアの奇跡 楊穎.jpg' %}" alt="Top Image" style="max-width:100%;">
+    <div id="visual-u-workspace">
+
+<div class="visual-block pos-row1" style="grid-column: 1;">
+            <p>(アジアの奇跡)</p> 
+            <div class="hexagon-container bg-pink">
+                <img src="{% static 'homepage/images/アジアの奇跡 楊穎.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row1" style="grid-column: 4;">
+            <p>(汉服图片)</p> 
+            <div class="hexagon-container bg-pink">
+                <img src="{% static 'homepage/images/汉服图片.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row2" style="grid-column: 1;">
+            <p>(つぐみ)</p> 
+            <div class="hexagon-container bg-emerald">
+                <img src="{% static 'homepage/images/つぐみ.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row2" style="grid-column: 4;">
+            <p>(ねりきり)</p> 
+            <div class="hexagon-container bg-emerald">
+                <img src="{% static 'homepage/images/ねりきり.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+
+        <div class="visual-block pos-row3" style="grid-column: 1;">
+            <p>(さるすべりの花)</p> 
+            <div class="hexagon-container bg-gold">
+                <img src="{% static 'homepage/images/さるすべり.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row3-center" style="grid-column: 2;">
+            <p>(ななかまど)</p> 
+            <div class="hexagon-container bg-gold">
+                <img src="{% static 'homepage/images/ななかまど.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row3-center" style="grid-column: 3;">
+            <p>(苔と石)</p> 
+            <div class="hexagon-container bg-gold">
+                <img src="{% static 'homepage/images/苔と石.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+        <div class="visual-block pos-row3" style="grid-column: 4;">
+            <p>(宇宙)</p> 
+            <div class="hexagon-container bg-gold">
+                <img src="{% static 'homepage/images/宇宙.jpg' %}" alt="Top Image" class="hexagon-image">
+            </div>
+        </div>
+
     </div>
 </div>
 

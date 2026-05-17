@@ -29,8 +29,8 @@
 </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <a id="top-button" class="btn btn-primary position-fixed" href="#header" style="display: none; right: 20px; bottom: 20px; z-index: 1000;">
+<body class="{% block body_class %}{% endblock %}" >
+    <a id="top-button" class="btn btn-primary position-fixed" href="#header" style="display: none; bottom: 20px; z-index: 1000;">
         <i class="bi bi-box-arrow-up"></i>
     </a>
 
