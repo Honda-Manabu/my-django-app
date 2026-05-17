@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - main
-      - staging
     paths:
       - '**'
       
 
 jobs:
-  deploy:
-    environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
+  deploy-staging:
+    # environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
+    environment: Staging
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Server via SSH
@@ -27,6 +27,27 @@ jobs:
             #git fetch origin ${{ github.ref_name }}
             #git reset --hard origin/${{ github.ref_name }}
             git pull origin ${{ github.ref_name }}
+            sudo chown -R bitnami:bitnami .
+            pip install -r requirements.txt
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+            sudo /opt/bitnami/ctlscript.sh restart apache || true
+            
+  deploy-production:
+    needs: deploy-staging
+    environment: Production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.REMOTE_PATH }}
+            git pull origin main
             sudo chown -R bitnami:bitnami .
             pip install -r requirements.txt
             python manage.py migrate --noinput
