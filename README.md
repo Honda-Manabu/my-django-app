@@ -1478,3 +1478,24 @@ Reference
 ```
 ### **[7]-E Automation of Deployment and Presentation of the Final Development and Operational Environment for Local, Stajing, and Production**
 #### **[7]-E-1 **
+```
+PowerShell
+   PS C:\projects\django-docker-project> function gpush ($msg) {
+   >>     git add .
+   >>     git commit -m "$msg"
+   >>     git push origin main
+   >> }
+   PS C:\projects\django-docker-project> gpush "test deploy"
+   warning: in the working copy of 'homepage/static/homepage/styles.css', LF     will be replaced by CRLF the next time Git touches it
+   [main 0f9e68d] test deploy
+   8 files changed, 350 insertions(+), 160 deletions(-)
+   create mode 100644 "homepage/static/homepage/images/  \343\201\255\343\202\212\343\201\215\343\202\212.jpg"
+   Enumerating objects: 34, done.
+   Counting objects: 100% (34/34), done.
+   Delta compression using up to 12 threads
+   Compressing objects: 100% (14/14), done.
+   Writing objects: 100% (18/18), 197.09 KiB | 11.59 MiB/s, done.
+   Total 18 (delta 10), reused 0 (delta 0), pack-reused 0 (from 0)
+   remote: Resolving deltas: 100% (10/10), completed with 10 local objects.
+   To https://github.com/Honda-Manabu/my-django-app.git
+      cf9e7b9..0f9e68d  main -> main
