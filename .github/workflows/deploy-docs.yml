@@ -11,16 +11,22 @@ jobs:
   deploy-staging:
     environment: Staging
     runs-on: ubuntu-latest
+    
+    env:
+      SSH_HOST: ${{ secrets.SERVER_HOST }}
+      SSH_USER: ${{ secrets.SERVER_USER }}
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
     steps:
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22 
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
+          port: 22
           script: |
-            cd ${{ secrets.REMOTE_PATH }}
+            cd ${{ env.REMOTE_PATH }}
             git pull origin ${{ github.ref_name }}
             sudo chown -R bitnami:bitnami .
             docker-compose exec -T web pip install -r requirements.txt
@@ -32,16 +38,21 @@ jobs:
     needs: deploy-staging
     environment: Production
     runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SERVER_HOST }}
+      SSH_USER: ${{ secrets.SERVER_USER }}
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
     steps:
       - name: Deploy to Production Server via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
           port: 22
           script: |
-            cd ${{ secrets.REMOTE_PATH }}
+            cd ${{ env.REMOTE_PATH }}
             git pull origin main
             sudo chown -R bitnami:bitnami .
             docker-compose exec -T web pip install -r requirements.txt
