@@ -59,4 +59,3 @@ jobs:
             docker-compose exec -T web python manage.py collectstatic --noinput
             
             sudo /opt/bitnami/ctlscript.sh restart apache || true
-            

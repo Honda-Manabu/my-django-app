@@ -1477,25 +1477,103 @@ Reference
  https://github.com/Honda-Manabu/my-django-app/settings/environments/13851764540/edit  
 ```
 ### **[7]-E Automation of Deployment and Presentation of the Final Development and Operational Environment for Local, Stajing, and Production**
-#### **[7]-E-1 **
+#### **[7]-E-1 Creating deploy-docs.yml**
+The first time I automated the deployment for 'README.md', it was very simple.
+(Created by Gemini)
 ```
-PowerShell
-   PS C:\projects\django-docker-project> function gpush ($msg) {
-   >>     git add .
-   >>     git commit -m "$msg"
-   >>     git push origin main
-   >> }
-   PS C:\projects\django-docker-project> gpush "test deploy"
-   warning: in the working copy of 'homepage/static/homepage/styles.css', LF     will be replaced by CRLF the next time Git touches it
-   [main 0f9e68d] test deploy
-   8 files changed, 350 insertions(+), 160 deletions(-)
-   create mode 100644 "homepage/static/homepage/images/  \343\201\255\343\202\212\343\201\215\343\202\212.jpg"
-   Enumerating objects: 34, done.
-   Counting objects: 100% (34/34), done.
-   Delta compression using up to 12 threads
-   Compressing objects: 100% (14/14), done.
-   Writing objects: 100% (18/18), 197.09 KiB | 11.59 MiB/s, done.
-   Total 18 (delta 10), reused 0 (delta 0), pack-reused 0 (from 0)
-   remote: Resolving deltas: 100% (10/10), completed with 10 local objects.
-   To https://github.com/Honda-Manabu/my-django-app.git
-      cf9e7b9..0f9e68d  main -> main
+deploy-docs.yml
+   name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'README.md'
+      - 'note.md'
+
+jobs:
+  deploy:
+    environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.REMOTE_PATH }}
+            git pull origin ${{ github.ref_name }}
+```
+##### **References: Note (24)** Deployment processes
+Deployment involves re-executing a series of processes in addition to GitHub Pull.
+
+The following is the code I finally arrived at.
+```
+deploy-docs.yml
+   name: Deploy Documentation
+
+   on:
+      push:
+         branches:
+            - main
+         paths:
+            - '**'    
+
+   jobs:
+      deploy-staging:
+         # environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
+         environment: Staging
+         runs-on: ubuntu-latest
+         steps:
+            - name: Deploy to Server via SSH
+               uses: appleboy/ssh-action@master
+               with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  port: ${{ secrets.SSH_PORT || 22 }}
+               script: |
+                  cd ${{ secrets.REMOTE_PATH }}
+                  # 2. 強制上書き対応が必要な場合 git pull と入れ替え
+                  #git fetch origin ${{ github.ref_name }}
+                  #git reset --hard origin/${{ github.ref_name }}
+                  git pull origin ${{ github.ref_name }}
+            
+                  sudo chown -R bitnami:bitnami .
+            
+                  docker-compose exec -T web pip install -r requirements.txt
+                  docker-compose exec -T web python manage.py migrate --noinput
+                  docker-compose exec -T web python manage.py collectstatic --noinput
+            
+                  sudo /opt/bitnami/ctlscript.sh restart apache || true
+            
+   deploy-production:
+      needs: deploy-staging
+      environment: Production
+      runs-on: ubuntu-latest
+      steps:
+         - name: Deploy to Production Server via SSH
+            uses: appleboy/ssh-action@master
+            with:
+               host: ${{ secrets.SERVER_HOST }}
+               username: ${{ secrets.SERVER_USER }}
+               key: ${{ secrets.SSH_PRIVATE_KEY }}
+               port: ${{ secrets.SSH_PORT || 22 }}
+            script: |
+               cd ${{ secrets.REMOTE_PATH }}
+               git pull origin main
+            
+               sudo chown -R bitnami:bitnami .
+            
+               docker-compose exec -T web pip install -r requirements.txt
+               docker-compose exec -T web python manage.py migrate --noinput
+               docker-compose exec -T web python manage.py collectstatic --noinput
+            
+               sudo /opt/bitnami/ctlscript.sh restart apache || true
+```
+Here are the steps to finally begin fixing the style issues.
