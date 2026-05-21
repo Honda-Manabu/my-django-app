@@ -1512,6 +1512,8 @@ jobs:
 ##### **References: Note (24)** Deployment processes
 Deployment involves re-executing a series of processes in addition to GitHub Pull.
 
+The deployment process will be configured to start from a local environment, via StagingSSH connection, or GitHub Actions, allowing users to choose between deploying only the first half (Staging), only the second half (Production), or both, depending on the situation.
+
 The following is the code I finally arrived at.
 ```
 deploy-docs.yml
@@ -1520,60 +1522,63 @@ deploy-docs.yml
    on:
       push:
          branches:
-            - main
-         paths:
-            - '**'    
+         - main
+      paths:
+         - '**'
+      workflow_dispatch:
+      inputs:
+         target_env:
+            description: 'デプロイ対象を選択してください'
+            required: true
+            default: 'all'
+            type: choice
+            options:
+            - 'all'
+            - 'staging'
+            - 'production'
 
    jobs:
       deploy-staging:
-         # environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
-         environment: Staging
-         runs-on: ubuntu-latest
-         steps:
-            - name: Deploy to Server via SSH
-               uses: appleboy/ssh-action@master
-               with:
-                  host: ${{ secrets.SERVER_HOST }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  port: ${{ secrets.SSH_PORT || 22 }}
-               script: |
-                  cd ${{ secrets.REMOTE_PATH }}
-                  # 2. 強制上書き対応が必要な場合 git pull と入れ替え
-                  #git fetch origin ${{ github.ref_name }}
-                  #git reset --hard origin/${{ github.ref_name }}
-                  git pull origin ${{ github.ref_name }}
-            
-                  sudo chown -R bitnami:bitnami .
-            
-                  docker-compose exec -T web pip install -r requirements.txt
-                  docker-compose exec -T web python manage.py migrate --noinput
-                  docker-compose exec -T web python manage.py collectstatic --noinput
-            
-                  sudo /opt/bitnami/ctlscript.sh restart apache || true
-            
-   deploy-production:
-      needs: deploy-staging
-      environment: Production
+      environment: Staging
       runs-on: ubuntu-latest
+      if: |
+         (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
+         (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
       steps:
-         - name: Deploy to Production Server via SSH
+         - name: Deploy to Server via SSH
             uses: appleboy/ssh-action@master
             with:
                host: ${{ secrets.SERVER_HOST }}
                username: ${{ secrets.SERVER_USER }}
                key: ${{ secrets.SSH_PRIVATE_KEY }}
-               port: ${{ secrets.SSH_PORT || 22 }}
             script: |
                cd ${{ secrets.REMOTE_PATH }}
-               git pull origin main
-            
+               git pull origin ${{ github.ref_name }}
                sudo chown -R bitnami:bitnami .
-            
                docker-compose exec -T web pip install -r requirements.txt
                docker-compose exec -T web python manage.py migrate --noinput
                docker-compose exec -T web python manage.py collectstatic --noinput
-            
                sudo /opt/bitnami/ctlscript.sh restart apache || true
+
+      deploy-production:
+         runs-on: ubuntu-latest 
+         if: |
+            (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'production')) ||
+            (github.event_name == 'push' && !contains(github.event.head_commit.message, '[only staging]'))
+         steps:
+            - name: Deploy to Production Server via SSH
+               uses: appleboy/ssh-action@master
+               with:
+               host: ${{ secrets.SERVER_HOST }}
+               username: ${{ secrets.SERVER_USER }}
+               key: ${{ secrets.SSH_PRIVATE_KEY }}
+               script: |
+                  cd ${{ secrets.REMOTE_PATH }}
+                  git pull origin main
+                  sudo chown -R bitnami:bitnami .
+                  docker-compose exec -T web pip install -r requirements.txt
+                  docker-compose exec -T web python manage.py migrate --noinput
+                  docker-compose exec -T web python manage.py collectstatic --noinput
+                  sudo /opt/bitnami/ctlscript.sh restart apache || true
 ```
-Here are the steps to finally begin fixing the style issues.
+Here are the steps to finally begin fixing the style issues.However, regarding HTML/CSS, I would love to use media queries to adjust settings based on screen size and convert fixed values ​​(px) to relative units (vh/rem/%), but given the circumstances so far, it doesn't seem like (the free Gemini) is good at that. So, I'll leave the level of completion for the future and prioritize submitting the final project.

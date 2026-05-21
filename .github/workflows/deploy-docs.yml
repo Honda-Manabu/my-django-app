@@ -6,11 +6,25 @@ on:
       - main
     paths:
       - '**'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'デプロイ対象を選択してください'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'staging'
+          - 'production'
 
 jobs:
   deploy-staging:
     environment: Staging
     runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
     steps:
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
@@ -28,9 +42,10 @@ jobs:
             sudo /opt/bitnami/ctlscript.sh restart apache || true
 
   deploy-production:
-    needs: deploy-staging
-    environment: Production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'production')) ||
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[only staging]'))
     steps:
       - name: Deploy to Production Server via SSH
         uses: appleboy/ssh-action@master
