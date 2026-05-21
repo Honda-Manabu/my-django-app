@@ -1526,54 +1526,55 @@ deploy-docs.yml
       paths:
          - '**'
       workflow_dispatch:
-      inputs:
-         target_env:
-            description: 'デプロイ対象を選択してください'
-            required: true
-            default: 'all'
-            type: choice
-            options:
-            - 'all'
-            - 'staging'
-            - 'production'
+         inputs:
+            target_env:
+               description: 'デプロイ対象を選択してください'
+               required: true
+               default: 'all'
+               type: choice
+               options:
+                  - 'all'
+                  - 'staging'
+                  - 'production'
 
    jobs:
       deploy-staging:
-      environment: Staging
-      runs-on: ubuntu-latest
-      if: |
-         (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
-         (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
-      steps:
-         - name: Deploy to Server via SSH
-            uses: appleboy/ssh-action@master
-            with:
-               host: ${{ secrets.SERVER_HOST }}
-               username: ${{ secrets.SERVER_USER }}
-               key: ${{ secrets.SSH_PRIVATE_KEY }}
-            script: |
-               cd ${{ secrets.REMOTE_PATH }}
-               git pull origin ${{ github.ref_name }}
-               sudo chown -R bitnami:bitnami .
-               docker-compose exec -T web pip install -r requirements.txt
-               docker-compose exec -T web python manage.py migrate --noinput
-               docker-compose exec -T web python manage.py collectstatic --noinput
-               sudo /opt/bitnami/ctlscript.sh restart apache || true
-
-      deploy-production:
-         runs-on: ubuntu-latest 
+         environment: Staging
+         runs-on: ubuntu-latest
          if: |
-            (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'production')) ||
-            (github.event_name == 'push' && !contains(github.event.head_commit.message, '[only staging]'))
+            (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
+            (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
          steps:
-            - name: Deploy to Production Server via SSH
+            - name: Deploy to Server via SSH
                uses: appleboy/ssh-action@master
                with:
-               host: ${{ secrets.SERVER_HOST }}
-               username: ${{ secrets.SERVER_USER }}
-               key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  host: ${{ vars.SERVER_HOST }}
+                  username: ${{ vars.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY2 }}
+                  script: |
+                     cd ${{ vars.REMOTE_PATH }}
+                     git pull origin ${{ github.ref_name }}
+                     sudo chown -R bitnami:bitnami .
+                     docker-compose exec -T web pip install -r requirements.txt
+                     docker-compose exec -T web python manage.py migrate --noinput
+                     docker-compose exec -T web python manage.py collectstatic --noinput
+                     sudo /opt/bitnami/ctlscript.sh restart apache || true
+
+   deploy-production:
+      environment: Production
+      runs-on: ubuntu-latest 
+      if: |
+         (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'production')) ||
+         (github.event_name == 'push' && !contains(github.event.head_commit.message, '[only staging]'))
+      steps:
+         - name: Deploy to Production Server via SSH
+            uses: appleboy/ssh-action@master
+            with:
+               host: ${{ vars.SERVER_HOST }}
+               username: ${{ vars.SERVER_USER }}
+               key: ${{ secrets.SSH_PRIVATE_KEY1 }}
                script: |
-                  cd ${{ secrets.REMOTE_PATH }}
+                  cd ${{ vars.REMOTE_PATH }}
                   git pull origin main
                   sudo chown -R bitnami:bitnami .
                   docker-compose exec -T web pip install -r requirements.txt
