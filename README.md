@@ -1555,10 +1555,11 @@ deploy-docs.yml
                      cd ${{ vars.REMOTE_PATH }}
                      git pull origin ${{ github.ref_name }}
                      sudo chown -R bitnami:bitnami .
-                     docker-compose exec -T web pip install -r requirements.txt
-                     docker-compose exec -T web python manage.py migrate --noinput
-                     docker-compose exec -T web python manage.py collectstatic --noinput
-                     sudo /opt/bitnami/ctlscript.sh restart apache || true
+                     docker compose exec -T web pip install -r requirements.txt
+                     docker compose exec -T web python manage.py migrate --noinput
+                     docker compose exec -T web python manage.py collectstatic --noinput
+                     docker compose restart web
+                     sudo /opt/bitnami/ctlscript.sh restart apache
 
    deploy-production:
       environment: Production
@@ -1577,9 +1578,10 @@ deploy-docs.yml
                   cd ${{ vars.REMOTE_PATH }}
                   git pull origin main
                   sudo chown -R bitnami:bitnami .
-                  docker-compose exec -T web pip install -r requirements.txt
-                  docker-compose exec -T web python manage.py migrate --noinput
-                  docker-compose exec -T web python manage.py collectstatic --noinput
-                  sudo /opt/bitnami/ctlscript.sh restart apache || true
+                  docker compose exec -T web pip install -r requirements.txt
+                  docker compose exec -T web python manage.py migrate --noinput
+                  docker compose exec -T web python manage.py collectstatic --noinput
+                  docker compose restart web
+                  sudo /opt/bitnami/ctlscript.sh restart apache
 ```
 Here are the steps to finally begin fixing the style issues.However, regarding HTML/CSS, I would love to use media queries to adjust settings based on screen size and convert fixed values ​​(px) to relative units (vh/rem/%), but given the circumstances so far, it doesn't seem like (the free Gemini) is good at that. So, I'll leave the level of completion for the future and prioritize submitting the final project.
