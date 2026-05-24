@@ -26,9 +26,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
       (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
     steps:
-      - name: Force IPv4 for DNS resolution
+      - name: Clear DNS and Network Cache
         run: |
-          sudo sh -c 'echo "precedence ::ffff:0:0/96  100" >> /etc/gai.conf'
+          sudo systemd-resolve --flush-caches || true
+          sudo systemctl restart systemd-resolved || true
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
