@@ -26,14 +26,15 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
       (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
     steps:
-      - name: Clear DNS and Network Cache
+      - name: Get IPv4 address from domain
+        id: get_ipv4
         run: |
-          sudo systemd-resolve --flush-caches || true
-          sudo systemctl restart systemd-resolved || true
+          IPV4_ADDR=$(dig +short A ${{ vars.SERVER_HOST }} | tail -n1)
+          echo "TARGET_IPV4=${IPV4_ADDR}" >> $GITHUB_ENV
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ vars.SERVER_HOST }}
+          host: ${{ env.TARGET_IPV4 }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY2 }}
           script: |
