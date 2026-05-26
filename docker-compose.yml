@@ -20,6 +20,9 @@ services:
       - .:/app
     ports:
       - "8001:8000"
+    volumes:
+      - .:/app
+      - ./static:/app/staticfiles
     depends_on:
       - db
     environment:

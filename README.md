@@ -1584,4 +1584,9 @@ deploy-docs.yml
                   docker compose restart web
                   sudo /opt/bitnami/ctlscript.sh restart apache
 ```
+##### **References: Note (25)** GitHub Actions bug
+#### **[7]-E-2 Solution for broken display in production only (styles not loaded, images not displayed)**
+
+
+
 Here are the steps to finally begin fixing the style issues.However, regarding HTML/CSS, I would love to use media queries to adjust settings based on screen size and convert fixed values ​​(px) to relative units (vh/rem/%), but given the circumstances so far, it doesn't seem like (the free Gemini) is good at that. So, I'll leave the level of completion for the future and prioritize submitting the final project.
