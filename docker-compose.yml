@@ -22,7 +22,7 @@ services:
       - "8001:8000"
     volumes:
       - .:/app
-      - ./static:/app/staticfiles
+      - ./staticfiles:/app/staticfiles
     depends_on:
       - db
     environment:
