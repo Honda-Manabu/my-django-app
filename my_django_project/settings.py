@@ -89,13 +89,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'my_django_project.wsgi.application'
 
+DJANGO_DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+if DJANGO_DEBUG:
+    # ローカル環境用（HTTPS化を無効にする）
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+else:
 # プロキシ経由のHTTPS接続を正しく判定するための設定
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 31536000
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
