@@ -18,12 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from homepage.views import contact_view, contact_send
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('homepage.urls')),
     path('myapp/', include('myapp.urls')),
+    path('contact/', contact_view, name='contact'),
+    path('contact/send/', contact_send, name='contact_send'),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if not settings.DEBUG and getattr(settings, 'IS_LOCAL', False):
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    ]

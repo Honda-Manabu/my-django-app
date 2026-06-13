@@ -136,7 +136,7 @@
 
                 <!-- 右側：フォーム本体 -->
                 <div class="contact-right" style="flex: 1; min-width: 300px;">
-                    <form action="#" method="post">
+                    <form id="contact-form" method="post">
                         {% csrf_token %}
                         <input type="text" name="name" id="field-name">
                         <input type="email" name="email" id="field-email">
@@ -177,7 +177,8 @@
             'sendBtn': "送信",
             'successMsg': "メールが送信されました。返事をお待ちください。",
             'achTitle': "事績",
-            'achContent': ""
+            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' }
+            
         },
         'en': {
             'intro': `We will put into action what we've written on the community page and explore ways to make the community's activities global.
@@ -194,7 +195,7 @@ This space is provided for discussion and shaping among those who agree with the
             'sendBtn': "SEND",
             'successMsg': "The email has been sent. Please wait for a reply.",
             'achTitle': "Achievements",
-            'achContent': ""
+            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' }
         }
     };
 
@@ -204,14 +205,12 @@ This space is provided for discussion and shaping among those who agree with the
         const data = contactData[lang];
         if (!data) return;
 
-        // テキスト要素の更新
         document.getElementById('contact-text-p').innerText = data.intro;
         document.getElementById('contact-heading').innerText = data.heading;
         document.getElementById('contact-subheading').innerText = data.subheading;
         document.getElementById('achievements-title').innerText = data.achTitle;
         document.getElementById('achievements-content').innerText = data.achContent;
 
-        // フォームプレースホルダーとボタン
         const nameField = document.getElementById('field-name');
         const emailField = document.getElementById('field-email');
         const subjectField = document.getElementById('field-subject');
@@ -227,43 +226,45 @@ This space is provided for discussion and shaping among those who agree with the
 
     // フォーム送信処理
     document.getElementById('contact-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // ページリロードを防止
-
-        const data = contactData[currentLang];
-        const name = document.getElementById('field-name').value;
-        const email = document.getElementById('field-email').value;
-        const subject = document.getElementById('field-subject').value;
-        const message = document.getElementById('field-message').value;
-        // ブラウザ標準のバリデーションに加え、JSで簡易チェック
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-            responseArea.innerText = currentLang === 'ja' ? "有効なメールアドレスを入力してください。" : "Please enter a valid email address.";
-            return;
-        }
-
-        // 入力内容の表示用HTML作成
-        const submittedDataHtml = `
-            <strong>${data.labels.name}:</strong> ${name}<br>
-            <strong>${data.labels.email}:</strong> ${email}<br>
-            <strong>${data.labels.subject}:</strong> ${subject}<br>
-            <strong>${data.labels.message}:</strong> ${message}
-        `;
-
-        // 結果エリアの表示
+        event.preventDefault();
+        
+        const lang = localStorage.getItem('selectedLang') || 'en';
+        const dataLabels = contactData[lang].labels;
         const responseArea = document.getElementById('form-response-area');
-        document.getElementById('submitted-data').innerHTML = submittedDataHtml;
-        document.getElementById('response-status-msg').innerText = data.successMsg;
-        
 
-        // In the future, data will be sent to the Django View using Ajax (Fetch API),
+        const payload = {
+            name: document.getElementById('field-name').value,
+            email: document.getElementById('field-email').value,
+            subject: document.getElementById('field-subject').value,
+            message: document.getElementById('field-message').value
+        };
 
-        // and then sent to the email address from the Django side.
-
-        // Currently, the UI only displays the message.
-        
-        responseArea.style.display = 'block';
-        this.reset(); // フォームをクリア
+        fetch('{% url "contact_send" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const submittedDataHtml = `
+                    <strong>${dataLabels.name}:</strong> ${payload.name}<br>
+                    <strong>${dataLabels.email}:</strong> ${payload.email}<br>
+                    <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
+                    <strong>${dataLabels.message}:</strong> ${payload.message}
+                `;
+                document.getElementById('submitted-data').innerHTML = submittedDataHtml;
+                document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
+                responseArea.style.display = 'block';
+                document.getElementById('contact-form').reset();
+            } else {
+                alert('Error sending email.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
 
     document.addEventListener("DOMContentLoaded", function() {

@@ -1,7 +1,10 @@
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.conf import settings
 
 def ms_index(request):
-    return render(request, 'homepage/ms.index.html')
+    return render(request, 'homepage/ms_index.html')
 
 def ms_cmtys(request):
     return render(request, 'homepage/ms_cmtys.html')
@@ -30,5 +33,34 @@ def spage(request, num):
         'num': num,
         'is_about_me_section': is_about_me,
     }
-    
     return render(request, template_name, context)
+
+
+def contact_view(request):
+    return render(request, 'homepage/ms_contact.html')
+
+def contact_send(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            name = data.get('name')
+            email = data.get('email')
+            subject = data.get('subject', 'No Subject')
+            message = data.get('message')
+
+            full_message = f"From: {name} <{email}>\n\n{message}"
+            
+            send_mail(
+                subject,
+                full_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [settings.CONTACT_EMAIL],
+                fail_silently=False,
+            )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'invalid method'}, status=400)
+    
+

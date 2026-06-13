@@ -1586,7 +1586,139 @@ deploy-docs.yml
 ```
 ##### **References: Note (25)** GitHub Actions bug
 #### **[7]-E-2 Solution for broken display in production only (styles not loaded, images not displayed)**
-
-
+Besides cookies, speed improvements are achieved everywhere through process optimization (following past practices) (Docker, Django, Apache), and simply modifying the code or configuration is often ineffective. Furthermore, even if it works locally, the display may break in the server environment, requiring modifications to settings (such as .env, *-vhost.conf and Complete reset and restart) to handle the differences between local and online environments.
 
 Here are the steps to finally begin fixing the style issues.However, regarding HTML/CSS, I would love to use media queries to adjust settings based on screen size and convert fixed values ​​(px) to relative units (vh/rem/%), but given the circumstances so far, it doesn't seem like (the free Gemini) is good at that. So, I'll leave the level of completion for the future and prioritize submitting the final project.
+#### **[7]-E-3 Email receiving settings for production deployment**
+I may submit my final project assignment, but since the production environment is live, I should ensure that I am able to receive contact.
+
+Gemini's presentation
+
+Implement the logic to process requests from the Fetch API and actually send emails.
+```
+views.py
+   from django.shortcuts import render
+   from django.http import JsonResponse
+   from django.core.mail import send_mail
+   from django.conf import settings
+
+
+   def contact_view(request):
+      return render(request, 'ms_contact.html')
+
+   def contact_send(request):
+      if request.method == 'POST':
+         name = request.POST.get('name')
+         email = request.POST.get('email')
+         subject = request.POST.get('subject', 'No Subject')
+         message = request.POST.get('message')
+
+         full_message = f"From: {name} <{email}>\n\n{message}"
+
+         try:
+            send_mail(
+                subject,
+                full_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [settings.CONTACT_EMAIL],
+                fail_silently=False,
+            )
+            return JsonResponse({'status': 'success'})
+         except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+      return JsonResponse({'status': 'invalid method'}, status=400)
+```
+```
+ms_contact.html
+   <form id="contact-form" method="post">
+      {% csrf_token %}
+      <input type="text" name="name" id="field-name">
+      <input type="email" name="email" id="field-email">
+      <input type="text" name="subject" id="field-subject">
+      <textarea name="message" id="field-message" rows="5"></textarea>
+      <button type="submit" id="btn-send" class="send-btn"></button>
+   </form>
+
+   <script>
+      const contactData = {
+         'ja': {
+            ...
+            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' }
+         },
+         'en': {
+            ...
+            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' }
+         }
+      };
+
+      document.getElementById('contact-form').addEventListener('submit', function(event) {
+         event.preventDefault();
+        
+         const lang = localStorage.getItem('selectedLang') || 'en';
+         const dataLabels = contactData[lang].labels;
+         const responseArea = document.getElementById('form-response-area');
+
+         const payload = {
+            name: document.getElementById('field-name').value,
+            email: document.getElementById('field-email').value,
+            subject: document.getElementById('field-subject').value,
+            message: document.getElementById('field-message').value
+         };
+
+         fetch('{% url "contact" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+         })
+         .then(response => response.json())
+         .then(data => {
+            if (data.status === 'success') {
+                const submittedDataHtml = `
+                    <strong>${dataLabels.name}:</strong> ${payload.name}<br>
+                    <strong>${dataLabels.email}:</strong> ${payload.email}<br>
+                    <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
+                    <strong>${dataLabels.message}:</strong> ${payload.message}
+                `;
+                document.getElementById('submitted-data').innerHTML = submittedDataHtml;
+                document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
+                responseArea.style.display = 'block';
+                document.getElementById('contact-form').reset();
+            } else {
+                  alert('Error sending email.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+   </script>
+```
+Other fixes
+```
+urls.py
+   from django.urls import path
+   from homepage.views import contact_view, contact_send
+
+   urlpatterns = [
+      path('contact/', contact_view, name='contact'),
+      path('contact/send/', contact_send, name='contact_send'),   
+   ]
+
+settings.py
+    import os
+   from dotenv import load_dotenv
+
+   load_dotenv()
+
+   # Email Settings
+   EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+   EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+   EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+   EMAIL_USE_TLS = True
+   EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+   EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+   DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+   CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', EMAIL_HOST_USER)  
+```
