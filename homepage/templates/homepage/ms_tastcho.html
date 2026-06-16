@@ -66,7 +66,7 @@
 
 <main>
     <div id="tastcho-content">
-        <h2 id="tastcho-title">お気に入り / Favorites</h2>
+        <h2 id="tastcho-title">Favorites</h2>
         
         <div class="image-gallery">
             <div class="image-item">
@@ -75,21 +75,31 @@
             <div class="image-item">
                 <img src="{% static 'homepage/images/一只小碗碗1.jpg' %}" alt="一只小碗碗1">
             </div>
-            </div>
+        </div>
 
         <div class="external-link-section">
-            <p style="margin-bottom: 10px;">関連動画をチェックする</p>
+            <p id="tastcho-video-heading" style="margin-bottom: 10px;">Check out related videos</p>
+            
             <a href="https://www.facebook.com/share/r/1H6rc6iCKJ/" 
                target="_blank" 
                rel="noopener noreferrer" 
+               id="tastcho-link-fb1"
                class="fb-link-button">
-                動画はこちら（Facebookへ移動します）
+                Click here for the video (Opens Facebook)
             </a>
             <a href="https://www.facebook.com/reel/24671949649169344" 
                target="_blank" 
                rel="noopener noreferrer" 
+               id="tastcho-link-fb2"
                class="fb-link-button">
-                動画２
+                Video 2
+            </a>
+            <a href="https://www.facebook.com/reel/2072931476771856" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               id="tastcho-link-fb3"
+               class="fb-link-button">
+                Video 3
             </a>
         </div>
     </div>
@@ -98,11 +108,25 @@
 <script>
     function switchLanguage(lang) {
         const titleElement = document.getElementById('tastcho-title');
+        const headingElement = document.getElementById('tastcho-video-heading');
+        const linkFb1 = document.getElementById('tastcho-link-fb1');
+        const linkFb2 = document.getElementById('tastcho-link-fb2');
+        const linkFb3 = document.getElementById('tastcho-link-fb3');
+
+        if (!titleElement) return;
 
         if (lang === 'ja') {
             titleElement.innerText = 'お気に入り';
-        } else if (lang === 'en') {
+            headingElement.innerText = '関連動画をチェックする';
+            linkFb1.innerText = '動画はこちら（Facebookへ移動します）';
+            linkFb2.innerText = '動画２';
+            linkFb3.innerText = '動画３';
+        } else {
             titleElement.innerText = 'Favorites';
+            headingElement.innerText = 'Check out related videos';
+            linkFb1.innerText = 'Click here for the video (Opens Facebook)';
+            linkFb2.innerText = 'Video 2';
+            linkFb3.innerText = 'Video 3';
         }
     }
 </script>

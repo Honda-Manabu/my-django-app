@@ -32,6 +32,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 #DEBUG = True
+IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'blog-michaeljp.net',      
@@ -104,12 +105,11 @@ if DJANGO_DEBUG:
 else:
     # プロキシ経由のHTTPS接続を正しく判定するための設定
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = not IS_LOCAL
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
-
-IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'    
+    
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
