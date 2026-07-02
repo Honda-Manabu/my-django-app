@@ -36,7 +36,7 @@
     }
 
     .contact-left h2 {
-        font-family: 'Cedarville Cursive', cursive; /* 筆記体 */
+        font-family: 'Cedarville Cursive', cursive;
         font-size: 2.5rem;
         margin-bottom: 20px;
     }
@@ -49,7 +49,7 @@
     .contact-right input, 
     .contact-right textarea {
         width: 100%;
-        background-color: #3fa2e4; /* 青い入力欄 */
+        background-color: #3fa2e4;
         border: none;
         border-radius: 8px;
         padding: 10px;
@@ -73,14 +73,14 @@
         cursor: pointer;
     }
 
-    /* SNSアイコンのリスト（黒い点を消す） */
+    /*
     .contact-left ul {
         list-style: none;
         padding: 0;
         display: flex;
         gap: 10px;
     }
-
+    */
     .sns-icons {
         list-style: none;
         padding: 0;
@@ -89,18 +89,18 @@
     }
 
     .sns-icons li {
-        background-color: #000; /* 黒い背景 */
-        width: 32px;           /* サイズ */
+        background-color: #000;
+        width: 32px;
         height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 6px;    /* 角の取れた正方形 */
+        border-radius: 6px;
         cursor: pointer;
     }
 
     .sns-icons i {
-        color: #f8adcc;        /* アイコンの色（背景のピンクをここに指定すると、抜けて見えます） */
+        color: #f8adcc;
         font-size: 18px;
     }
 
@@ -148,15 +148,12 @@
             </div>
         </div>
         <div id="form-response-area" style="display: none; margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: rgba(255,255,255,0.5);">
-                        <div id="submitted-data" style="margin-bottom: 10px; font-size: 0.9rem;"></div>
-                        <div id="response-status-msg" style="color: #d63384; font-weight: bold;"></div>
-                    </div>
-                </div>
-            </div>
+                <div id="submitted-data" style="margin-bottom: 10px; font-size: 0.9rem;"></div>
+                <div id="response-status-msg" style="color: #d63384; font-weight: bold;"></div>
         </div>
 
         <h3 id="achievements-title"></h3>
-        <p id="achievements-content"></p></p>
+        <p id="achievements-content"></p>
     </div>
 </main>
 
@@ -176,8 +173,9 @@
             },
             'sendBtn': "送信",
             'successMsg': "メールが送信されました。返事をお待ちください。",
+            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' },
             'achTitle': "事績",
-            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' }
+            'achContent': ""
             
         },
         'en': {
@@ -194,8 +192,9 @@ This space is provided for discussion and shaping among those who agree with the
             },
             'sendBtn': "SEND",
             'successMsg': "The email has been sent. Please wait for a reply.",
+            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' },
             'achTitle': "Achievements",
-            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' }
+            'achContent': ""
         }
     };
 
@@ -247,7 +246,12 @@ This space is provided for discussion and shaping among those who agree with the
             },
             body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Server responded with ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 const submittedDataHtml = `
@@ -261,10 +265,13 @@ This space is provided for discussion and shaping among those who agree with the
                 responseArea.style.display = 'block';
                 document.getElementById('contact-form').reset();
             } else {
-                alert('Error sending email.');
+                alert('Error sending email: ' + (data.message || 'Unknown error'));
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending email. (500 Internal Server Error)');
+        });
     });
 
     document.addEventListener("DOMContentLoaded", function() {

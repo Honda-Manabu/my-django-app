@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
+import json
 
 def ms_index(request):
     return render(request, 'homepage/ms_index.html')

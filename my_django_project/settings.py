@@ -49,9 +49,16 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Application definition
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ap-northeast-1.amazonaws.com' 
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'AKIAXMVBUGZZEBHWOWFY'
+EMAIL_HOST_PASSWORD = 'BCEL0P+B+Srbp2reuInr7OMgUB+Bj2s50ClL1Qy+JDib'
+DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
+#ローカルデバッグ
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 CONTACT_EMAIL = 'honda.m3742@icloud.com'
 
 INSTALLED_APPS = [

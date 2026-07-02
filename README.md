@@ -1476,7 +1476,7 @@ Environment variables
 Reference
  https://github.com/Honda-Manabu/my-django-app/settings/environments/13851764540/edit  
 ```
-### **[7]-E Automation of Deployment and Presentation of the Final Development and Operational Environment for Local, Stajing, and Production**
+### **[7]-E Automation of Deployment and Presentation of the Final Development and Operational Environment for Local, Staging, and Production**
 #### **[7]-E-1 Creating deploy-docs.yml**
 The first time I automated the deployment for 'README.md', it was very simple.
 (Created by Gemini)
@@ -1594,6 +1594,7 @@ I may submit my final project assignment, but since the production environment i
 
 Gemini's presentation
 
+The procedure involves first verifying the script Json's operation by logging actions without actually sending emails, and then applying for email authentication within the server environment.
 Implement the logic to process requests from the Fetch API and actually send emails.
 ```
 views.py
@@ -1601,21 +1602,23 @@ views.py
    from django.http import JsonResponse
    from django.core.mail import send_mail
    from django.conf import settings
-
+   import json
 
    def contact_view(request):
-      return render(request, 'ms_contact.html')
+      return render(request, 'homepage/ms_contact.html')
 
    def contact_send(request):
       if request.method == 'POST':
-         name = request.POST.get('name')
-         email = request.POST.get('email')
-         subject = request.POST.get('subject', 'No Subject')
-         message = request.POST.get('message')
-
-         full_message = f"From: {name} <{email}>\n\n{message}"
-
          try:
+            data = json.loads(request.body)
+            
+            name = data.get('name')
+            email = data.get('email')
+            subject = data.get('subject', 'No Subject')
+            message = data.get('message')
+
+            full_message = f"From: {name} <{email}>\n\n{message}"
+            
             send_mail(
                 subject,
                 full_message,
@@ -1631,6 +1634,7 @@ views.py
 ```
 ```
 ms_contact.html
+   <<!--div class="contact-right" -->
    <form id="contact-form" method="post">
       {% csrf_token %}
       <input type="text" name="name" id="field-name">
@@ -1688,14 +1692,17 @@ ms_contact.html
                 responseArea.style.display = 'block';
                 document.getElementById('contact-form').reset();
             } else {
-                  alert('Error sending email.');
+                  alert('Error sending email.' + (data.message || 'Unknown error'));
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending email. (500 Internal Server Error)');
+        });
       });
    </script>
 ```
-Other fixes
+Other fixes (Only the additions are described here.)
 ```
 urls.py
    from django.urls import path
@@ -1705,20 +1712,77 @@ urls.py
       path('contact/', contact_view, name='contact'),
       path('contact/send/', contact_send, name='contact_send'),   
    ]
+   if not settings.DEBUG and settings.IS_LOCAL:
+    urlpatterns += [
+        path('static/<path:path>', serve, {'document_root': settings.STATIC_ROOT}),
+   ]
 
 settings.py
-    import os
+   
    from dotenv import load_dotenv
 
-   load_dotenv()
+   load_dotenv(BASE_DIR / ".env")
 
-   # Email Settings
+   #DEBUG = True
+   IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'
+
+   DJANGO_DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+   DEBUG = DJANGO_DEBUG
+   if DJANGO_DEBUG:
+      # ローカル環境用（HTTPS化を無効にする）
+      SECURE_SSL_REDIRECT = False
+      SESSION_COOKIE_SECURE = False
+      CSRF_COOKIE_SECURE = False
+      SECURE_HSTS_SECONDS = 0
+   else:
+      # プロキシ経由のHTTPS接続を正しく判定するための設定
+      SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+      SECURE_SSL_REDIRECT = not IS_LOCAL
+      SESSION_COOKIE_SECURE = True
+      CSRF_COOKIE_SECURE = True
+   # Application definition
    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-   EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-   EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+   EMAIL_HOST = 'smtp.mail.ap-northeast-1.amazonaws.com' 
+   EMAIL_PORT = 587
    EMAIL_USE_TLS = True
-   EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-   EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-   DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-   CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', EMAIL_HOST_USER)  
+   EMAIL_HOST_USER = 'AKIAXMVBUGZZEBHWOWFY'
+   EMAIL_HOST_PASSWORD = 'BCEL0P+B+Srbp2reuInr7OMgUB+Bj2s50ClL1Qy+JDib'
+   DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
+   #ローカルデバッグ
+   #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+   #DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+   CONTACT_EMAIL = 'honda.m3742@icloud.com'
+```
+#### **[7]-E-4 Amazon SES Configuration**   
+Gemini suggested using Gmail's SMTP, but a warning regarding outdated security specifications prompted the decision to use the paid Amazon SES service. Eight issues arose during the configuration process.
+
+1. Amazon SES New User Registration
+
+   Verify the contact email address (xxxx@gmail.com). This step was completed quickly.
+
+2. IAM User Registration and SMTP Credentials
+
+   Obtain SMTP credentials. You must record the displayed information immediately, as it will not be shown again.
+
+3. Registering an Email Address-Type Identity
+
+   Sending a test email to the address (xxxx@gmail.com) automatically registers the identity and completes the process.
+
+4. Registering a Domain-Type Identity
+
+   Three CNAME records are generated. While I am unsure of the procedure if the domain was purchased elsewhere, I used Route 53, so the records were generated there automatically. I then waited for the DKIM verification process to complete. In reality, I had to update the NS records for the registered domain by removing the existing entries and adding the four name server names displayed in the Route 53 hosted zone. Verification did not occur even after waiting 72 hours. Although Gemini didn't have the answer, my past experience struggling with WordPress a few years ago proved helpful. It didn't happen in minutes, but verification was completed overnight.
+
+5. Requesting Production Access
+
+   Approval usually takes within 24 hours, but I received an email requesting additional information. The method for submitting this information was unclear. I sent a message to support, but the outcome remains to be seen.
+
+6. Skip and proceed.
+
+   I haven't received approval for the production application yet. Since the current plan only involves sending emails from a verified domain to my own email address, I can simply verify my email address and conduct tests within the sandbox environment; that setup will work just fine for production as well.
+
+#### **[7]-E-5 Email sending/receiving test on the staging server**
+
+A system mechanism (notification setting) to automatically detect errors where emails fail to reach my address (i.e., bounce)
+```
+
 ```
