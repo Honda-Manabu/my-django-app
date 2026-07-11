@@ -14,4 +14,6 @@ urlpatterns = [
     path('about/', views.spage, {'num': 0}, name='ms_spage0'),
     # http://localhost:8000/spage1/ などを表示
     path('spage<int:num>/', views.spage, name='spage'),
+    path('contact/send/', views.contact_send, name='contact_send'),
+    path('aws/ses-bounce/', views.ses_bounce_webhook, name='ses_bounce_webhook'),
 ]

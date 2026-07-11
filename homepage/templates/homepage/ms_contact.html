@@ -270,7 +270,10 @@ This space is provided for discussion and shaping among those who agree with the
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error sending email. (500 Internal Server Error)');
+            const msg = (localStorage.getItem('selectedLang') || 'en') === 'ja' 
+               ? 'システムエラーが発生しました。時間をおいて再度お試しいただくか、SNS等からご連絡ください。' 
+               : 'A server error occurred. Please try again later or contact via SNS.';
+           alert(msg);
         });
     });
 

@@ -19,9 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # .env ファイルの読み込み
 load_dotenv(BASE_DIR / ".env")
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,9 +32,12 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "fallback-secret-key")
 IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'blog-michaeljp.net',      
-    'www.blog-michaeljp.net',
-    #'35.75.58.24',             
+    #Server:mydjango-vhost.conf ServerName VirtualHost
+    #Production
+        #'michealfamily.com', 'www.michealfamily.com', '52.69.81.143'
+    #Staging
+        #'blog-michaeljp.net', 'www.blog-michaeljp.net', '35.75.58.24',    
+    #local           
     '127.0.0.1',
     'localhost',
     'web',  
@@ -49,17 +49,21 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Application definition
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.ap-northeast-1.amazonaws.com' 
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'AKIAXMVBUGZZEBHWOWFY'
-EMAIL_HOST_PASSWORD = 'BCEL0P+B+Srbp2reuInr7OMgUB+Bj2s50ClL1Qy+JDib'
-DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
-#ローカルデバッグ
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-CONTACT_EMAIL = 'honda.m3742@icloud.com'
+EMAIL_MODE = os.environ.get('EMAIL_MODE', 'console')
+if EMAIL_MODE == 'ses':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.mail.ap-northeast-1.amazonaws.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+    
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+CONTACT_RECIPIENT_EMAIL = os.environ.get('CONTACT_RECIPIENT_EMAIL', 'honda.m3742@icloud.com')
 
 INSTALLED_APPS = [
     'django.contrib.admin',

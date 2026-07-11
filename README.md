@@ -1104,6 +1104,7 @@ Bash
    (The rest is omitted.)
    (The DNS settings inside Docker were a bottleneck, causing repeated errors that took over 1000 seconds, but it finished in less than 20 seconds.)
 ```
+This workaround will hinder automated deployment later on; see [7]-D-7 Adjustment.
 #### **[6]-C2-3 Starting the application, migration, and checking browser access**
 Container startup
 ```
@@ -1774,11 +1775,10 @@ Gemini suggested using Gmail's SMTP, but a warning regarding outdated security s
 
 5. Requesting Production Access
 
-   Approval usually takes within 24 hours, but I received an email requesting additional information. The method for submitting this information was unclear. I sent a message to support, but the outcome remains to be seen.
+   Approval usually takes within 24 hours, but I received an email requesting additional information. The method for submitting this information was unclear. More than a week wasted due to unnecessary waiting.I haven't received approval for the production application yet.
 
-6. Skip and proceed.
-
-   I haven't received approval for the production application yet. Since the current plan only involves sending emails from a verified domain to my own email address, I can simply verify my email address and conduct tests within the sandbox environment; that setup will work just fine for production as well.
+6. I added a Type A record to the Route 53 hosted zone, obtained approval for production access, and proceeded to the next step.
+##### **References: Note (26)** Attempted to skip approval and move on  
 
 #### **[7]-E-5 Email sending/receiving test on the staging server**
 
