@@ -42,8 +42,8 @@ ALLOWED_HOSTS = [
     'localhost',
     'web',  
 ]
-    host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()
-#]
+[ALLOWED_HOSTS.append(host.strip()) for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
+
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
 ]
