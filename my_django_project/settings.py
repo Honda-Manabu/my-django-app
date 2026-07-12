@@ -34,9 +34,9 @@ IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'
 ALLOWED_HOSTS = [
     #Server:mydjango-vhost.conf ServerName VirtualHost
     #Production
-        #'michealfamily.com', 'www.michealfamily.com', '52.69.81.143'
+        'michealfamily.com', 'www.michealfamily.com', #'52.69.81.143'
     #Staging
-        #'blog-michaeljp.net', 'www.blog-michaeljp.net', '35.75.58.24',    
+        'blog-michaeljp.net', 'www.blog-michaeljp.net', #'35.75.58.24',    
     #local           
     '127.0.0.1',
     'localhost',
