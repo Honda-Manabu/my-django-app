@@ -223,63 +223,67 @@ This space is provided for discussion and shaping among those who agree with the
         sendBtn.innerText = data.sendBtn;
     }
 
-    // フォーム送信処理
-    document.getElementById('contact-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const lang = localStorage.getItem('selectedLang') || 'en';
-        const dataLabels = contactData[lang].labels;
-        const responseArea = document.getElementById('form-response-area');
-
-        const payload = {
-            name: document.getElementById('field-name').value,
-            email: document.getElementById('field-email').value,
-            subject: document.getElementById('field-subject').value,
-            message: document.getElementById('field-message').value
-        };
-
-        fetch('{% url "contact_send" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Server responded with ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                const submittedDataHtml = `
-                    <strong>${dataLabels.name}:</strong> ${payload.name}<br>
-                    <strong>${dataLabels.email}:</strong> ${payload.email}<br>
-                    <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
-                    <strong>${dataLabels.message}:</strong> ${payload.message}
-                `;
-                document.getElementById('submitted-data').innerHTML = submittedDataHtml;
-                document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
-                responseArea.style.display = 'block';
-                document.getElementById('contact-form').reset();
-            } else {
-                alert('Error sending email: ' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const msg = (localStorage.getItem('selectedLang') || 'en') === 'ja' 
-               ? 'システムエラーが発生しました。時間をおいて再度お試しいただくか、SNS等からご連絡ください。' 
-               : 'A server error occurred. Please try again later or contact via SNS.';
-           alert(msg);
-        });
-    });
-
     document.addEventListener("DOMContentLoaded", function() {
         const savedLang = localStorage.getItem('selectedLang') || 'en';
         switchLanguage(savedLang);
+    // フォーム送信処理
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+        
+                const lang = localStorage.getItem('selectedLang') || 'en';
+                const dataLabels = contactData[lang].labels;
+                const responseArea = document.getElementById('form-response-area');
+
+                const payload = {
+                    name: document.getElementById('field-name').value,
+                    email: document.getElementById('field-email').value,
+                    subject: document.getElementById('field-subject').value,
+                    message: document.getElementById('field-message').value
+                };
+
+                fetch('{% url "contact_send" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Server responded with ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        const submittedDataHtml = `
+                            <strong>${dataLabels.name}:</strong> ${payload.name}<br>
+                            <strong>${dataLabels.email}:</strong> ${payload.email}<br>
+                            <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
+                            <strong>${dataLabels.message}:</strong> ${payload.message}
+                        `;
+                        document.getElementById('submitted-data').innerHTML = submittedDataHtml;
+                        document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
+                        responseArea.style.display = 'block';
+                        contactForm.reset();
+                    } else {
+                        alert('Error sending email: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const msg = (localStorage.getItem('selectedLang') || 'en') === 'ja' 
+                        ? 'システムエラーが発生しました。時間をおいて再度お試しいただくか、SNS等からご連絡ください。' 
+                        : 'A server error occurred. Please try again later or contact via SNS.';
+                    alert(msg);
+                });
+            });
+        } else {
+            console.error("エラー: 'contact-form' を持つ要素がHTML内に見つかりません。");
+        }
     });
 </script>
 {% endblock %}
