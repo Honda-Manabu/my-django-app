@@ -1559,6 +1559,7 @@ deploy-docs.yml
                      docker compose exec -T web pip install -r requirements.txt
                      docker compose exec -T web python manage.py migrate --noinput
                      docker compose exec -T web python manage.py collectstatic --noinput
+                     docker compose exec -T web touch my_django_project/wsgi.py
                      docker compose restart web
                      sudo /opt/bitnami/ctlscript.sh restart apache
 
@@ -1582,6 +1583,7 @@ deploy-docs.yml
                   docker compose exec -T web pip install -r requirements.txt
                   docker compose exec -T web python manage.py migrate --noinput
                   docker compose exec -T web python manage.py collectstatic --noinput
+                  docker compose exec -T web touch my_django_project/wsgi.py
                   docker compose restart web
                   sudo /opt/bitnami/ctlscript.sh restart apache
 ```
