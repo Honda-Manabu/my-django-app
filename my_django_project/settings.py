@@ -57,7 +57,7 @@ if EMAIL_MODE == 'ses':
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+    DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
     
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
