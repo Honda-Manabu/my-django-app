@@ -49,6 +49,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Application definition
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_MODE = os.environ.get('EMAIL_MODE', 'console')
 if EMAIL_MODE == 'ses':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -58,10 +60,7 @@ if EMAIL_MODE == 'ses':
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
-    
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
 
 CONTACT_RECIPIENT_EMAIL = os.environ.get('CONTACT_RECIPIENT_EMAIL', 'honda.m3742@icloud.com')
 
