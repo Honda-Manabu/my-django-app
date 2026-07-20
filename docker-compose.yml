@@ -12,9 +12,8 @@ services:
 
   web:
     build: .
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    extra_hosts:
+      - "smtp.mail.ap-northeast-1.amazonaws.com:15.197.202.162"
     env_file:
       - .env
     command: >
