@@ -54,7 +54,7 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_MODE = os.environ.get('EMAIL_MODE')
 if EMAIL_MODE == 'ses':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.mail.ap-northeast-1.amazonaws.com'
+    EMAIL_HOST = 'email-smtp.ap-northeast-1.amazonaws.com'
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
