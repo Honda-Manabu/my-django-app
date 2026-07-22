@@ -16,6 +16,9 @@ services:
     #  - "email-smtp.ap-northeast-1.amazonaws.com:15.197.202.162"
     env_file:
       - .env
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     command: >
       sh -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000 --insecure"
     ports:
