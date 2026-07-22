@@ -1,4 +1,4 @@
-name: Deploy Documentation
+name: Deploy Documentation / App
 
 on:
   push:
@@ -34,13 +34,24 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY2 }}
           script: |
             cd ${{ vars.REMOTE_PATH }}
+            git fetch origin ${{ github.ref_name }}
+            COMPOSE_CHANGED=$(git diff HEAD origin/${{ github.ref_name }} --name-only | grep "docker-compose.yml" || true)
             git pull origin ${{ github.ref_name }}
             sudo chown -R bitnami:bitnami .
+            if [ -n "$COMPOSE_CHANGED" ]; then
+              echo ">>> [Auto-detected] docker-compose.yml modified. Running 'docker compose up -d'..."
+              docker compose up -d
+            else
+              echo ">>> [Auto-detected] No changes in docker-compose.yml."
+            fi
             docker compose exec -T web pip install -r requirements.txt
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput
             docker compose exec -T web touch my_django_project/wsgi.py
-            docker compose restart web
+            if [ -z "$COMPOSE_CHANGED" ]; then
+              echo ">>> Restarting web container..."
+              docker compose restart web
+            fi
             sudo /opt/bitnami/ctlscript.sh restart apache
 
   deploy-production:
@@ -58,11 +69,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY1 }}
           script: |
             cd ${{ vars.REMOTE_PATH }}
-            git pull origin main
+            git fetch origin ${{ github.ref_name }}
+            COMPOSE_CHANGED=$(git diff HEAD origin/${{ github.ref_name }} --name-only | grep "docker-compose.yml" || true)
+            git pull origin ${{ github.ref_name }}
             sudo chown -R bitnami:bitnami .
+            if [ -n "$COMPOSE_CHANGED" ]; then
+              echo ">>> [Auto-detected] docker-compose.yml modified. Running 'docker compose up -d'..."
+              docker compose up -d
+            else
+              echo ">>> [Auto-detected] No changes in docker-compose.yml."
+            fi
             docker compose exec -T web pip install -r requirements.txt
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput
             docker compose exec -T web touch my_django_project/wsgi.py
-            docker compose restart web
+            if [ -z "$COMPOSE_CHANGED" ]; then
+              echo ">>> Restarting web container..."
+              docker compose restart web
+            fi
             sudo /opt/bitnami/ctlscript.sh restart apache

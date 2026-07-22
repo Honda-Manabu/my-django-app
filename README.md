@@ -1729,32 +1729,33 @@ settings.py
    #DEBUG = True
    IS_LOCAL = os.environ.get('IS_LOCAL', 'False') == 'True'
 
-   DJANGO_DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-   DEBUG = DJANGO_DEBUG
-   if DJANGO_DEBUG:
-      # ローカル環境用（HTTPS化を無効にする）
-      SECURE_SSL_REDIRECT = False
-      SESSION_COOKIE_SECURE = False
-      CSRF_COOKIE_SECURE = False
-      SECURE_HSTS_SECONDS = 0
-   else:
-      # プロキシ経由のHTTPS接続を正しく判定するための設定
-      SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-      SECURE_SSL_REDIRECT = not IS_LOCAL
-      SESSION_COOKIE_SECURE = True
-      CSRF_COOKIE_SECURE = True
-   # Application definition
-   EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-   EMAIL_HOST = 'smtp.mail.ap-northeast-1.amazonaws.com' 
-   EMAIL_PORT = 587
-   EMAIL_USE_TLS = True
-   EMAIL_HOST_USER = 'AKIAXMVBUGZZEBHWOWFY'
-   EMAIL_HOST_PASSWORD = 'BCEL0P+B+Srbp2reuInr7OMgUB+Bj2s50ClL1Qy+JDib'
-   DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
-   #ローカルデバッグ
-   #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-   #DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-   CONTACT_EMAIL = 'honda.m3742@icloud.com'
+  ALLOWED_HOSTS = [    
+    #local           
+    '127.0.0.1',
+    'localhost',
+    'web',  
+]
+[ALLOWED_HOSTS.append(host.strip()) for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
+]
+
+# Application definition
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+EMAIL_MODE = os.environ.get('EMAIL_MODE')
+if EMAIL_MODE == 'ses':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'email-smtp.ap-northeast-1.amazonaws.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
+
+
+CONTACT_RECIPIENT_EMAIL = 'honda.m3742@icloud.com'
 ```
 #### **[7]-E-4 Amazon SES Configuration**   
 Gemini suggested using Gmail's SMTP, but a warning regarding outdated security specifications prompted the decision to use the paid Amazon SES service. Eight issues arose during the configuration process.
