@@ -14,6 +14,8 @@ services:
     build: .
     #extra_hosts:
     #  - "email-smtp.ap-northeast-1.amazonaws.com:15.197.202.162"
+    dns:
+      - 172.26.0.2
     env_file:
       - .env
     command: >
