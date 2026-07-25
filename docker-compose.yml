@@ -14,8 +14,6 @@ services:
     build: .
     #extra_hosts:
     #  - "email-smtp.ap-northeast-1.amazonaws.com:15.197.202.162"
-    dns:
-      - 172.26.0.2
     env_file:
       - .env
     command: >
@@ -30,6 +28,10 @@ services:
     environment:
       - DATABASE_HOST=db  # settings.py の os.environ.get を指定
     #  - DATABASE_URL=postgres://your_user_name:your_password@db:5432/your_db_name
+    dns:
+      - 172.18.0.1  # Dockerブリッジ（ホストOS）のGateway IPを指定
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   postgres_data:
