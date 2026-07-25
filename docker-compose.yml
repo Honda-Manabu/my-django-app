@@ -31,6 +31,9 @@ services:
     environment:
     #  - DATABASE_HOST=db  # settings.py の os.environ.get を指定
       - DATABASE_HOST=127.0.0.1
+      - DATABASE_NAME=django_db
+      - DATABASE_USER=django_user
+      - DATABASE_PASSWORD=HM31764713DB
     #  - DATABASE_URL=postgres://your_user_name:your_password@db:5432/your_db_name
 
 volumes:
