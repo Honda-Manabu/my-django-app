@@ -1,0 +1,76 @@
+name: Staging DB Nightly Backup
+
+on:
+  schedule:
+    # 毎夜中（日本時間 午前3:00 ＝ UTC 18:00）に実行
+    - cron: '0 18 * * *'
+  workflow_dispatch: # 手動実行用ボタン
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment: StagingDB
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate Date Factors (Odd/Even & Sunday check)
+        id: date_check
+        run: |
+          DAY_NUM=$(date +%-d) # 日付 (1-31)
+          DAY_OF_WEEK=$(date +%w) # 曜日 (0=日曜日, 1=月曜日, ..., 6=土曜日)
+          
+          if [ $((DAY_NUM % 2)) -ne 0 ]; then
+            echo "FILE_NAME=backup_odd.sql.gz" >> $GITHUB_OUTPUT
+            echo "Day pattern: Odd ($DAY_NUM)"
+          else
+            echo "FILE_NAME=backup_even.sql.gz" >> $GITHUB_OUTPUT
+            echo "Day pattern: Even ($DAY_NUM)"
+          fi
+          
+          if [ "$DAY_OF_WEEK" -eq 0 ]; then
+            echo "IS_SUNDAY=true" >> $GITHUB_OUTPUT
+            echo "Today is Sunday!"
+          else
+            echo "IS_SUNDAY=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up SSH Private Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DB_SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ vars.LIGHTSAIL_PORT }} -H ${{ vars.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Take PostgreSQL Dump from Container via SSH
+        run: |
+          mkdir -p backups
+          FILE_PATH="backups/${{ steps.date_check.outputs.FILE_NAME }}"
+          
+          # Docker コンテナ内で pg_dumpall を実行し、圧縮してローカル（GitHub Runner）に保存
+          ssh -p ${{ vars.LIGHTSAIL_PORT }} ${{ vars.LIGHTSAIL_USER }}@${{ vars.LIGHTSAIL_HOST }} \
+            "docker exec -e PGPASSWORD='${{ secrets.STA_DB_PASSWORD }}' ${{ vars.DB_CONTAINER_NAME }} pg_dumpall -U ${{ vars.DB_USER }}" \
+            | gzip > "$FILE_PATH"
+
+      - name: Commit and Push Backup to Repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          
+          if git diff --cached --quiet; then
+            echo "No changes in DB backup."
+          else
+            git commit -m "chore(db): update nightly backup [${{ steps.date_check.outputs.FILE_NAME }}]"
+            git push
+          fi
+
+      # 日曜日のみ：ローカル PC から手動または API でダウンロードできるように Artifact 化
+      - name: Upload Artifact (Sunday Only)
+        if: steps.date_check.outputs.IS_SUNDAY == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunday-db-backup
+          path: backups/${{ steps.date_check.outputs.FILE_NAME }}
+          retention-days: 7
