@@ -10,6 +10,8 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     environment: StagingDB
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
