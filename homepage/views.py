@@ -1,10 +1,11 @@
 import json
 import logging
-
+import requests
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.core.mail import send_mail
+#from django.core.mail import send_mail
+from my_django_project.common.mail.ses import send_mail
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 
@@ -45,6 +46,8 @@ def spage(request, num):
 def contact_view(request):
     return render(request, 'homepage/ms_contact.html')
 
+logger = logging.getLogger(__name__)
+
 def contact_send(request):
     if request.method == 'POST':
         try:
@@ -60,22 +63,27 @@ def contact_send(request):
 
             email_body = f"名前: {name}\nメールアドレス: {email}\n\n件名: {subject}\n\n【本文】: {message}"
             
-            send_mail(
+            #send_mail(
+            #    subject=f"[お問い合わせ] {subject}",
+            #    message=email_body,
+            #    from_email=settings.DEFAULT_FROM_EMAIL,
+            #    recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
+            #    fail_silently=False,
+            #)
+            result = send_mail(
                 subject=f"[お問い合わせ] {subject}",
-                message=email_body,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
-                fail_silently=False,
+                body=email_body,
+                recipient=settings.CONTACT_RECIPIENT_EMAIL,
             )
+            #debuggyou
+            #print(result)
+            if not result["success"]:
+                raise Exception(result["error"])
             return JsonResponse({'status': 'success'})
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Contact form error: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message':'Invalid method'}, status=405)
-    
-logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def ses_bounce_webhook(request):

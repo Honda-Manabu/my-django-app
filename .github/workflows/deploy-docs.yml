@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - '**'
+    paths-ignore:
+      - 'backups/**'
   workflow_dispatch:
     inputs:
       target_env:

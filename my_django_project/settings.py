@@ -49,6 +49,12 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Application definition
+# Amazon SES API
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_SES_REGION = os.getenv("AWS_SES_REGION")
+AWS_SES_FROM = os.getenv("AWS_SES_FROM")
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_MODE = os.environ.get('EMAIL_MODE')
