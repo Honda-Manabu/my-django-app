@@ -1524,68 +1524,7 @@ deploy-docs.yml
       push:
          branches:
          - main
-      paths:
-         - '**'
-      workflow_dispatch:
-         inputs:
-            target_env:
-               description: 'デプロイ対象を選択してください'
-               required: true
-               default: 'all'
-               type: choice
-               options:
-                  - 'all'
-                  - 'staging'
-                  - 'production'
-
-   jobs:
-      deploy-staging:
-         environment: Staging
-         runs-on: ubuntu-latest
-         if: |
-            (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'staging')) ||
-            (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip staging]'))
-         steps:
-            - name: Deploy to Server via SSH
-               uses: appleboy/ssh-action@master
-               with:
-                  host: ${{ vars.SERVER_HOST }}
-                  username: ${{ vars.SERVER_USER }}
-                  key: ${{ secrets.SSH_PRIVATE_KEY2 }}
-                  script: |
-                     cd ${{ vars.REMOTE_PATH }}
-                     git pull origin ${{ github.ref_name }}
-                     sudo chown -R bitnami:bitnami .
-                     docker compose exec -T web pip install -r requirements.txt
-                     docker compose exec -T web python manage.py migrate --noinput
-                     docker compose exec -T web python manage.py collectstatic --noinput
-                     docker compose exec -T web touch my_django_project/wsgi.py
-                     docker compose restart web
-                     sudo /opt/bitnami/ctlscript.sh restart apache
-
-   deploy-production:
-      environment: Production
-      runs-on: ubuntu-latest 
-      if: |
-         (github.event_name == 'workflow_dispatch' && (inputs.target_env == 'all' || inputs.target_env == 'production')) ||
-         (github.event_name == 'push' && !contains(github.event.head_commit.message, '[only staging]'))
-      steps:
-         - name: Deploy to Production Server via SSH
-            uses: appleboy/ssh-action@master
-            with:
-               host: ${{ vars.SERVER_HOST }}
-               username: ${{ vars.SERVER_USER }}
-               key: ${{ secrets.SSH_PRIVATE_KEY1 }}
-               script: |
-                  cd ${{ vars.REMOTE_PATH }}
-                  git pull origin main
-                  sudo chown -R bitnami:bitnami .
-                  docker compose exec -T web pip install -r requirements.txt
-                  docker compose exec -T web python manage.py migrate --noinput
-                  docker compose exec -T web python manage.py collectstatic --noinput
-                  docker compose exec -T web touch my_django_project/wsgi.py
-                  docker compose restart web
-                  sudo /opt/bitnami/ctlscript.sh restart apache
+      
 ```
 ##### **References: Note (25)** GitHub Actions bug
 #### **[7]-E-2 Solution for broken display in production only (styles not loaded, images not displayed)**
@@ -1598,17 +1537,23 @@ I may submit my final project assignment, but since the production environment i
 Gemini's presentation
 
 The procedure involves first verifying the script Json's operation by logging actions without actually sending emails, and then applying for email authentication within the server environment.
-Implement the logic to process requests from the Fetch API and actually send emails.
+Implement the logic to process requests from the Fetch API and actually send emails.Next, I will test email sending in the staging environment using Python's PowerShell. I am documenting this here as it may be useful for others working in different environments; the following details represent the final API-based implementation.
+
+ChatGPT's presentation                         
 ```
 views.py
+   import json
+   import logging
+   import requests
+   from django.http import HttpResponse
    from django.shortcuts import render
    from django.http import JsonResponse
-   from django.core.mail import send_mail
+   from my_django_project.common.mail.ses import send_mail
    from django.conf import settings
-   import json
+   from django.views.decorators.csrf import csrf_exempt
 
-   def contact_view(request):
-      return render(request, 'homepage/ms_contact.html')
+   ...
+   logger = logging.getLogger(__name__)
 
    def contact_send(request):
       if request.method == 'POST':
@@ -1620,24 +1565,65 @@ views.py
             subject = data.get('subject', 'No Subject')
             message = data.get('message')
 
-            full_message = f"From: {name} <{email}>\n\n{message}"
+            if not name or not email or not message:
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields.'}, status=400)
+
+            email_body = f"名前: {name}\nメールアドレス: {email}\n\n件名: {subject}\n\n【本文】: {message}"
             
-            send_mail(
-                subject,
-                full_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.CONTACT_EMAIL],
-                fail_silently=False,
+            result = send_mail(
+                subject=f"[お問い合わせ] {subject}",
+                body=email_body,
+                recipient=settings.CONTACT_RECIPIENT_EMAIL,
             )
+            #debuggyou
+            #print(result)
+            if not result["success"]:
+                raise Exception(result["error"])
             return JsonResponse({'status': 'success'})
          except Exception as e:
+            logger.error(f"Contact form error: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+      return JsonResponse({'status': 'error', 'message':'Invalid method'}, status=405)
 
-      return JsonResponse({'status': 'invalid method'}, status=400)
+   @csrf_exempt
+   def ses_bounce_webhook(request):
+      if request.method == 'POST':
+         try:
+            notification = json.loads(request.body)
+            
+            # 1. AWS SNS の購読確認（初回設定時に必要）
+            if notification.get('Type') == 'SubscriptionConfirmation':
+                subscribe_url = notification.get('SubscribeURL')
+                requests.get(subscribe_url)
+                logger.info("SNS Subscription Confirmed")
+                return HttpResponse('OK')
+
+            # 2. 実際の通知処理（Notification）
+            if notification.get('Type') == 'Notification':
+                message = json.loads(notification.get('Message'))
+                
+                # SESの通知タイプが Bounce かチェック
+                if message.get('notificationType') == 'Bounce':
+                    bounce = message.get('bounce')
+                    bounce_recipients = bounce.get('bouncedRecipients', [])
+                    
+                    for recipient in bounce_recipients:
+                        bounced_email = recipient.get('emailAddress')
+                        logger.error(f"【警告】メールがバウンスしました。宛先不明: {bounced_email}")
+                        # ここでDBのフラグを更新したり、システム管理者に通知を飛ばす処理を記述
+                        #先頭に　import requests
+                return HttpResponse('OK')
+                
+         except Exception as e:
+            logger.error(f"SNS Webhook Error: {str(e)}")
+            return HttpResponse('Internal Error', status=500)
+
+      return HttpResponse('Method Not Allowed', status=405)
 ```
 ```
 ms_contact.html
-   <<!--div class="contact-right" -->
+   ...
+   <!-- Input Form -->
    <form id="contact-form" method="post">
       {% csrf_token %}
       <input type="text" name="name" id="field-name">
@@ -1650,75 +1636,166 @@ ms_contact.html
    <script>
       const contactData = {
          'ja': {
-            ...
-            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' }
+            'intro': `コミュニティのページに書いたことを行動に移し、コミュニティの活動を世界的なものにするための方法を検討します。
+   オードリー・タンが提唱し、安野貴博がチーム未来を立ち上げた手法に詳しい方（AIエンジニア）を求めます。
+   趣旨に賛同し連絡をいただき会員になっていただいた方々で話し合い、形を築いていくためにこの場所を提供します。`,
+            'heading': "会話しましょう。 クリックして情報を入力してください。",
+            'subheading': "本田 学 宛",
+            'placeholders': {
+                'name': "お名前 *",
+                'email': "メールアドレス *",
+                'subject': "件名",
+                'message': "メッセージ"
+            },
+            'sendBtn': "送信",
+            'successMsg': "メールが送信されました。返事をお待ちください。",
+            'labels': { 'name': '名前', 'email': 'メール', 'subject': '件名', 'message': '本文' },
+            'achTitle': "事績",
+            'achContent': ""
+            
          },
          'en': {
-            ...
-            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' }
+            'intro': `We will put into action what we've written on the community page and explore ways to make the community's activities global.
+   We are seeking someone (AI engineer) familiar with the methodology advocated by Audrey Tang and used by Takahiro Yasuno to establish Team Mirai.
+   This space is provided for discussion and shaping among those who agree with the purpose, contact us, and become members.`,
+            'heading': "Let's Talk. Please click to enter your information.",
+            'subheading': "To Honda Manabu",
+            'placeholders': {
+                'name': "Your Name *",
+                'email': "Email Address *",
+                'subject': "Subject",
+                'message': "Message"
+            },
+            'sendBtn': "SEND",
+            'successMsg': "The email has been sent. Please wait for a reply.",
+            'labels': { 'name': 'Name', 'email': 'Email', 'subject': 'Subject', 'message': 'Message' },
+            'achTitle': "Achievements",
+            'achContent': ""
          }
       };
 
-      document.getElementById('contact-form').addEventListener('submit', function(event) {
-         event.preventDefault();
+      let currentLang = 'en';
+
+      function switchLanguage(lang) {
+         const data = contactData[lang];
+         if (!data) return;
+
+         document.getElementById('contact-text-p').innerText = data.intro;
+         document.getElementById('contact-heading').innerText = data.heading;
+         document.getElementById('contact-subheading').innerText = data.subheading;
+         document.getElementById('achievements-title').innerText = data.achTitle;
+         document.getElementById('achievements-content').innerText = data.achContent;
+
+         const nameField = document.getElementById('field-name');
+         const emailField = document.getElementById('field-email');
+         const subjectField = document.getElementById('field-subject');
+         const messageField = document.getElementById('field-message');
+         const sendBtn = document.getElementById('btn-send');
+
+         nameField.placeholder = data.placeholders.name;
+         emailField.placeholder = data.placeholders.email;
+         subjectField.placeholder = data.placeholders.subject;
+         messageField.placeholder = data.placeholders.message;
+         sendBtn.innerText = data.sendBtn;
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+         const savedLang = localStorage.getItem('selectedLang') || 'en';
+         switchLanguage(savedLang);
+      // フォーム送信処理
+         const contactForm = document.getElementById('contact-form');
+         if (contactForm) {
+            contactForm.addEventListener('submit', function(event) {
+               event.preventDefault();
         
-         const lang = localStorage.getItem('selectedLang') || 'en';
-         const dataLabels = contactData[lang].labels;
-         const responseArea = document.getElementById('form-response-area');
+               const lang = localStorage.getItem('selectedLang') || 'en';
+               const dataLabels = contactData[lang].labels;
+               const responseArea = document.getElementById('form-response-area');
 
-         const payload = {
-            name: document.getElementById('field-name').value,
-            email: document.getElementById('field-email').value,
-            subject: document.getElementById('field-subject').value,
-            message: document.getElementById('field-message').value
-         };
+               const payload = {
+                  name: document.getElementById('field-name').value,
+                  email: document.getElementById('field-email').value,
+                  subject: document.getElementById('field-subject').value,
+                  message: document.getElementById('field-message').value
+               };
 
-         fetch('{% url "contact" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(payload)
-         })
-         .then(response => response.json())
-         .then(data => {
-            if (data.status === 'success') {
-                const submittedDataHtml = `
-                    <strong>${dataLabels.name}:</strong> ${payload.name}<br>
-                    <strong>${dataLabels.email}:</strong> ${payload.email}<br>
-                    <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
-                    <strong>${dataLabels.message}:</strong> ${payload.message}
-                `;
-                document.getElementById('submitted-data').innerHTML = submittedDataHtml;
-                document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
-                responseArea.style.display = 'block';
-                document.getElementById('contact-form').reset();
-            } else {
-                  alert('Error sending email.' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error sending email. (500 Internal Server Error)');
-        });
+               fetch('{% url "contact_send" %}', {
+                  method: 'POST',
+                  headers: {
+                     'Content-Type': 'application/json',
+                     'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  body: JSON.stringify(payload)
+               })
+               .then(response => {
+                  if (!response.ok) {
+                     throw new Error('Server responded with ' + response.status);
+                  }
+                  return response.json();
+               })
+               .then(data => {
+                  if (data.status === 'success') {
+                        const submittedDataHtml = `
+                           <strong>${dataLabels.name}:</strong> ${payload.name}<br>
+                           <strong>${dataLabels.email}:</strong> ${payload.email}<br>
+                           <strong>${dataLabels.subject}:</strong> ${payload.subject}<br>
+                           <strong>${dataLabels.message}:</strong> ${payload.message}
+                        `;
+                        document.getElementById('submitted-data').innerHTML = submittedDataHtml;
+                        document.getElementById('response-status-msg').innerText = contactData[lang].successMsg;
+                        responseArea.style.display = 'block';
+                        contactForm.reset();
+                  } else {
+                     alert('Error sending email: ' + (data.message || 'Unknown error'));
+                  }
+               })
+               .catch(error => {
+                  console.error('Error:', error);
+                  const msg = (localStorage.getItem('selectedLang') || 'en') === 'ja' 
+                     ? 'システムエラーが発生しました。時間をおいて再度お試しいただくか、SNS等からご連絡ください。' 
+                     : 'A server error occurred. Please try again later or contact via SNS.';
+                  alert(msg);
+               });
+            });
+         } else {
+            console.error("エラー: 'contact-form' を持つ要素がHTML内に見つかりません。");
+         }
       });
    </script>
 ```
 Other fixes (Only the additions are described here.)
 ```
+requirements.txt
+   ...
+   boto3
+   requests
+
+.env
+   AWS_ACCESS_KEY_ID=...
+   AWS_SECRET_ACCESS_KEY=...
+   AWS_SES_REGION=ap-northeast-1
+   AWS_SES_FROM=xxxxx@example.com
+
 urls.py
-   from django.urls import path
+   from django.contrib import admin
+   from django.urls import path, include
+   from django.conf import settings
+   from django.views.static import serve
    from homepage.views import contact_view, contact_send
 
    urlpatterns = [
+      path('admin/', admin.site.urls),
+      path('', include('homepage.urls')),
+      path('myapp/', include('myapp.urls')),
       path('contact/', contact_view, name='contact'),
-      path('contact/send/', contact_send, name='contact_send'),   
+      path('contact/send/', contact_send, name='contact_send'),
    ]
+
    if not settings.DEBUG and settings.IS_LOCAL:
-    urlpatterns += [
-        path('static/<path:path>', serve, {'document_root': settings.STATIC_ROOT}),
-   ]
+      urlpatterns += [
+         path('static/<path:path>', serve, {'document_root': settings.STATIC_ROOT}),
+      ]
+
 
 settings.py
    
@@ -1734,28 +1811,66 @@ settings.py
     '127.0.0.1',
     'localhost',
     'web',  
-]
-[ALLOWED_HOSTS.append(host.strip()) for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
+   ]
+   [ALLOWED_HOSTS.append(host.strip()) for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
 
-CSRF_TRUSTED_ORIGINS = [
+   CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
-]
+   ]
 
-# Application definition
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-EMAIL_MODE = os.environ.get('EMAIL_MODE')
-if EMAIL_MODE == 'ses':
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'email-smtp.ap-northeast-1.amazonaws.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
+   # Amazon SES API
+   AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+   AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+   AWS_SES_REGION = os.getenv("AWS_SES_REGION")
+   AWS_SES_FROM = os.getenv("AWS_SES_FROM")
+
+   EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+   DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+   EMAIL_MODE = os.environ.get('EMAIL_MODE')
+   if EMAIL_MODE == 'ses':
+      EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+      EMAIL_HOST = 'email-smtp.ap-northeast-1.amazonaws.com'
+      EMAIL_PORT = 587
+      EMAIL_USE_TLS = True
+      EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+      EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+      DEFAULT_FROM_EMAIL = 'h.manabu3742@gmail.com'
 
 
-CONTACT_RECIPIENT_EMAIL = 'honda.m3742@icloud.com'
+   CONTACT_RECIPIENT_EMAIL = 'honda.m3742@icloud.com'
+   ...
+   Creating the SES API Sending Module (via ChatGPT)
+   ...
+   ses.py
+      import boto3
+      from botocore.exceptions import ClientError
+      from django.conf import settings
+      def send_mail(subject, body, recipient):
+      client = boto3.client(
+      "ses",
+      region_name=settings.AWS_SES_REGION,
+      aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+      )
+      try:
+         response = client.send_email(
+            Source=settings.AWS_SES_FROM,
+            Destination={ "ToAddresses": [recipient], },
+            Message={
+               "Subject": { "Data": subject, "Charset": "UTF-8",
+               },
+               "Body": { "Text": { "Data": body, "Charset": "UTF-8", } 
+               }, 
+            }, 
+         )
+         return {
+            "success": True, "message_id": response["MessageId"],
+         } 
+      except ClientError as e:
+         return { "success": False, "error": e.response["Error"]["Message"],
+         }
+   ...
+
 ```
 #### **[7]-E-4 Amazon SES Configuration**   
 Gemini suggested using Gmail's SMTP, but a warning regarding outdated security specifications prompted the decision to use the paid Amazon SES service. Eight issues arose during the configuration process.
@@ -1764,24 +1879,45 @@ Gemini suggested using Gmail's SMTP, but a warning regarding outdated security s
 
    Verify the contact email address (xxxx@gmail.com). This step was completed quickly.
 
-2. IAM User Registration and SMTP Credentials
+2. Create an IAM user specifically for the SES API
 
-   Obtain SMTP credentials. You must record the displayed information immediately, as it will not be shown again.
+   Create a custom policy allowing only `ses:SendEmail` and `ses:SendRawEmail`
+```
+   Json via ChatGPT
+   {
+      "Version": "2012-10-17",
+      "Statement": [
+         {
+            "Effect": "Allow",
+            "Action": [
+               "ses:SendEmail",
+               "ses:SendRawEmail"
+            ],
+            "Resource": "*"
+         }
+      ]
+   }
+```   
+   
+3. Obtain the Access Key ID and Secret Access Key from the "Security credentials" tab 
+   You must record the displayed information immediately, as it will not be shown again.
 
-3. Registering an Email Address-Type Identity
+4. Registering an Email Address-Type Identity
 
    Sending a test email to the address (xxxx@gmail.com) automatically registers the identity and completes the process.
 
-4. Registering a Domain-Type Identity
+5. Registering a Domain-Type Identity
 
    Three CNAME records are generated. While I am unsure of the procedure if the domain was purchased elsewhere, I used Route 53, so the records were generated there automatically. I then waited for the DKIM verification process to complete. In reality, I had to update the NS records for the registered domain by removing the existing entries and adding the four name server names displayed in the Route 53 hosted zone. Verification did not occur even after waiting 72 hours. Although Gemini didn't have the answer, my past experience struggling with WordPress a few years ago proved helpful. It didn't happen in minutes, but verification was completed overnight.
 
-5. Requesting Production Access
+6. Requesting Production Access
 
    Approval usually takes within 24 hours, but I received an email requesting additional information. The method for submitting this information was unclear. More than a week wasted due to unnecessary waiting.I haven't received approval for the production application yet.
 
-6. I added a Type A record to the Route 53 hosted zone, obtained approval for production access, and proceeded to the next step.
-##### **References: Note (26)** Attempted to skip approval and move on  
+7. I added a Type A record to the Route 53 hosted zone, obtained approval for production access, and proceeded to the next step.
+##### **References: Note (26)** Attempted to skip approval and move on
+##### **References: Note (27)**  Reworking the task
+From step [7]-E-1 onwards, I have rewritten the implementation—which was originally based on Gemini's Amazon SES proposal—to use the API-based method proposed by ChatGPT.
 
 #### **[7]-E-5 Email sending/receiving test on the staging server**
 

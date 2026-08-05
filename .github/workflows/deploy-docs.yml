@@ -34,19 +34,13 @@ jobs:
           host: ${{ vars.SERVER_HOST }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY2 }}
-          script: |
+          script: |   
             cd ${{ vars.REMOTE_PATH }}
+            echo "===== Update Repository ====="
             git pull origin ${{ github.ref_name }}
-            sudo chown -R bitnami:bitnami .
-            docker compose up -d
-            
-            docker compose exec -T web pip install -r requirements.txt
-            docker compose exec -T web python manage.py migrate --noinput
-            docker compose exec -T web python manage.py collectstatic --noinput
-            docker compose exec -T web touch my_django_project/wsgi.py
-            
-            docker compose restart web
-            sudo /opt/bitnami/ctlscript.sh restart apache
+            echo "===== Execute Deploy Script ====="
+            chmod +x scripts/deploy.sh
+            ./scripts/deploy.sh
 
   deploy-production:
     environment: Production
@@ -63,14 +57,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY1 }}
           script: |
             cd ${{ vars.REMOTE_PATH }}
+            echo "===== Update Repository ====="
             git pull origin ${{ github.ref_name }}
-            sudo chown -R bitnami:bitnami .
-            docker compose up -d
-            
-            docker compose exec -T web pip install -r requirements.txt
-            docker compose exec -T web python manage.py migrate --noinput
-            docker compose exec -T web python manage.py collectstatic --noinput
-            docker compose exec -T web touch my_django_project/wsgi.py
-            
-            docker compose restart web
-            sudo /opt/bitnami/ctlscript.sh restart apache
+            echo "===== Execute Deploy Script ====="
+            chmod +x scripts/deploy.sh
+            ./scripts/deploy.sh
