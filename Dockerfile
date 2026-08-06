@@ -19,8 +19,6 @@ RUN apt-get update --fix-missing && \
 # 5. requirements.txtをコピーしてライブラリをインストール
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
-# PostgreSQL接続用のライブラリを追加でインストール
-RUN pip install psycopg2-binary
 
 # 6. プロジェクトの全ファイルをコンテナにコピー
 COPY . /app/
